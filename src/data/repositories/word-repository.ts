@@ -40,7 +40,7 @@ export class WordRepository {
     const rows = await this.database.getAllAsync<WordRow>(
       `SELECT words.*
        FROM words
-       LEFT JOIN categories ON categories.id = words.category_id
+       LEFT JOIN categories ON categories.id = words.category_id AND categories.deleted_at IS NULL
        WHERE words.deleted_at IS NULL
          AND (
            words.local_user_id = $localUserId

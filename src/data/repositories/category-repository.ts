@@ -25,6 +25,13 @@ export type CreateCategoryInput = {
   color: string;
 };
 
+export class DuplicateCategoryError extends Error {
+  constructor(name: string) {
+    super(`A category named “${name}” already exists.`);
+    this.name = 'DuplicateCategoryError';
+  }
+}
+
 export class CategoryRepository {
   constructor(
     private readonly database: SQLiteDatabase,
@@ -58,6 +65,11 @@ export class CategoryRepository {
   async create(input: CreateCategoryInput): Promise<Category> {
     const name = normalizeRequiredText(input.name, 'Category name');
     const color = normalizeRequiredText(input.color, 'Category color');
+
+    if (await this.findActiveByNormalizedName(normalizeLookupValue(name))) {
+      throw new DuplicateCategoryError(name);
+    }
+
     const id = this.dependencies.createId();
     const timestamp = this.dependencies.now();
 
@@ -87,24 +99,69 @@ export class CategoryRepository {
 
   async softDelete(id: string): Promise<boolean> {
     const timestamp = this.dependencies.now();
-    const result = await this.database.runAsync(
-      `UPDATE categories
-       SET deleted_at = $timestamp,
-           updated_at = $timestamp,
-           sync_status = $syncStatus
-       WHERE id = $id
-         AND local_user_id = $localUserId
-         AND is_default = 0
-         AND deleted_at IS NULL`,
+    const syncStatus = this.identity.linkedUserId ? 'pending' : 'local';
+    let deleted = false;
+
+    await this.database.withTransactionAsync(async () => {
+      const result = await this.database.runAsync(
+        `UPDATE categories
+         SET deleted_at = $timestamp,
+             updated_at = $timestamp,
+             sync_status = $syncStatus
+         WHERE id = $id
+           AND local_user_id = $localUserId
+           AND is_default = 0
+           AND deleted_at IS NULL`,
+        {
+          $timestamp: timestamp,
+          $syncStatus: syncStatus,
+          $id: id,
+          $localUserId: this.identity.localUserId,
+        },
+      );
+
+      deleted = result.changes > 0;
+
+      if (deleted) {
+        await this.database.runAsync(
+          `UPDATE words
+           SET category_id = NULL,
+               updated_at = $timestamp,
+               sync_status = $syncStatus,
+               revision = revision + 1
+           WHERE category_id = $id
+             AND deleted_at IS NULL
+             AND (
+               local_user_id = $localUserId
+               OR ($userId IS NOT NULL AND user_id = $userId)
+             )`,
+          {
+            $timestamp: timestamp,
+            $syncStatus: syncStatus,
+            $id: id,
+            $localUserId: this.identity.localUserId,
+            $userId: this.identity.linkedUserId,
+          },
+        );
+      }
+    });
+
+    return deleted;
+  }
+
+  private findActiveByNormalizedName(normalizedName: string): Promise<CategoryRow | null> {
+    return this.database.getFirstAsync<CategoryRow>(
+      `SELECT *
+       FROM categories
+       WHERE local_user_id = $localUserId
+         AND normalized_name = $normalizedName
+         AND deleted_at IS NULL
+       LIMIT 1`,
       {
-        $timestamp: timestamp,
-        $syncStatus: this.identity.linkedUserId ? 'pending' : 'local',
-        $id: id,
         $localUserId: this.identity.localUserId,
+        $normalizedName: normalizedName,
       },
     );
-
-    return result.changes > 0;
   }
 
   private async insert({
@@ -122,10 +179,10 @@ export class CategoryRepository {
     timestamp: string;
     ignoreConflicts: boolean;
   }): Promise<void> {
-    const conflictClause = ignoreConflicts ? 'OR IGNORE' : '';
+    const insertCommand = ignoreConflicts ? 'INSERT OR IGNORE' : 'INSERT';
 
     await this.database.runAsync(
-      `INSERT ${conflictClause} INTO categories (
+      `${insertCommand} INTO categories (
          id, user_id, local_user_id, name, normalized_name, color, is_default,
          sync_status, created_at, updated_at, deleted_at
        ) VALUES (

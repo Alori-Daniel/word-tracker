@@ -1,40 +1,299 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
-import { ScrollView } from 'react-native';
+import { useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { EmptyState, PageHeader, Screen } from '@/components/ui';
-import { createThemedStyles } from '@/theme';
+import { AppText, EmptyState, PageHeader, Screen } from '@/components/ui';
+import { LEARNING_STATUSES, type LearningStatus } from '@/domain/vocabulary';
+import { useVocabulary, useWordList, WordListItem } from '@/features/vocabulary';
+import { createThemedStyles, useAppTheme } from '@/theme';
+
+type StatusFilter = LearningStatus | undefined;
 
 export default function LibraryScreen() {
   const styles = useStyles();
+  const { theme } = useAppTheme();
+  const { categories, wordCount } = useVocabulary();
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState<StatusFilter>();
+  const [categoryId, setCategoryId] = useState<string>();
+  const { error, hasMore, isLoading, isLoadingMore, loadMore, reload, words } = useWordList({
+    categoryId,
+    query,
+    status,
+  });
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
+  const hasFilters = Boolean(query.trim() || status || categoryId);
 
-  return (
-    <Screen edges={['top', 'right', 'left']}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+  const header = (
+    <View style={styles.headerContent}>
+      <View style={styles.titleRow}>
         <PageHeader
           description="Search, filter, and revisit every word you have saved."
           eyebrow="Your collection"
           title="Library"
         />
-        <EmptyState
-          actionLabel="Add a word"
-          description="Words you save will appear here, ready to search and organize."
-          icon="menu-book"
-          onAction={() => router.push('/(tabs)/add')}
-          title="Your library is waiting"
+        <Pressable
+          accessibilityLabel="Add a word"
+          accessibilityRole="button"
+          onPress={() => router.push('/(tabs)/add')}
+          style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
+        >
+          <MaterialIcons color={theme.colors.brand.onPrimary} name="add" size={25} />
+        </Pressable>
+      </View>
+
+      <View style={styles.searchBox}>
+        <MaterialIcons color={theme.colors.content.tertiary} name="search" size={22} />
+        <TextInput
+          accessibilityLabel="Search vocabulary"
+          autoCapitalize="none"
+          autoCorrect={false}
+          onChangeText={setQuery}
+          placeholder="Search words, meanings, notes…"
+          placeholderTextColor={theme.colors.content.tertiary}
+          returnKeyType="search"
+          selectionColor={theme.colors.brand.primary}
+          style={styles.searchInput}
+          value={query}
         />
+        {query ? (
+          <Pressable accessibilityLabel="Clear search" hitSlop={8} onPress={() => setQuery('')}>
+            <MaterialIcons color={theme.colors.content.tertiary} name="cancel" size={20} />
+          </Pressable>
+        ) : null}
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.filterRow}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        <FilterChip label="All levels" onPress={() => setStatus(undefined)} selected={!status} />
+        {LEARNING_STATUSES.map((item) => (
+          <FilterChip
+            key={item}
+            label={item[0].toUpperCase() + item.slice(1)}
+            onPress={() => setStatus(item)}
+            selected={status === item}
+          />
+        ))}
       </ScrollView>
+
+      <ScrollView
+        contentContainerStyle={styles.filterRow}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        <FilterChip
+          label="All categories"
+          onPress={() => setCategoryId(undefined)}
+          selected={!categoryId}
+        />
+        {categories.map((category) => (
+          <FilterChip
+            color={category.color}
+            key={category.id}
+            label={category.name}
+            onPress={() => setCategoryId(category.id)}
+            selected={categoryId === category.id}
+          />
+        ))}
+      </ScrollView>
+
+      {!isLoading && words.length > 0 ? (
+        <AppText tone="tertiary" variant="caption">
+          {words.length}
+          {hasMore ? '+' : ''} {words.length === 1 && !hasMore ? 'WORD' : 'WORDS'}
+        </AppText>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <Screen edges={['top', 'right', 'left']}>
+      <FlatList
+        contentContainerStyle={styles.content}
+        data={words}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        keyExtractor={(word) => word.id}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator color={theme.colors.brand.primary} size="large" />
+          ) : error ? (
+            <EmptyState
+              actionLabel="Try again"
+              description="Your local vault could not be read. Nothing has been removed."
+              icon="error-outline"
+              onAction={reload}
+              title="Could not load your words"
+            />
+          ) : (
+            <EmptyState
+              actionLabel={hasFilters ? undefined : 'Add a word'}
+              description={
+                hasFilters
+                  ? 'Try a different search or clear one of the filters.'
+                  : 'Words you save will appear here, ready to search and organize.'
+              }
+              icon={hasFilters ? 'search-off' : 'menu-book'}
+              onAction={hasFilters ? undefined : () => router.push('/(tabs)/add')}
+              title={hasFilters ? 'No matching words' : 'Your library is waiting'}
+            />
+          )
+        }
+        ListHeaderComponent={header}
+        ListFooterComponent={
+          isLoadingMore ? (
+            <ActivityIndicator
+              color={theme.colors.brand.primary}
+              size="small"
+              style={styles.listFooter}
+            />
+          ) : null
+        }
+        onEndReached={() => void loadMore()}
+        onEndReachedThreshold={0.35}
+        refreshControl={
+          <RefreshControl
+            onRefresh={reload}
+            refreshing={isLoading && wordCount > 0}
+            tintColor={theme.colors.brand.primary}
+          />
+        }
+        renderItem={({ item }) => (
+          <WordListItem
+            category={item.categoryId ? categoryById.get(item.categoryId) : undefined}
+            onPress={() => router.push({ pathname: '/word/[id]', params: { id: item.id } })}
+            word={item}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+      />
     </Screen>
+  );
+}
+
+function FilterChip({
+  color,
+  label,
+  onPress,
+  selected,
+}: {
+  color?: string;
+  label: string;
+  onPress: () => void;
+  selected: boolean;
+}) {
+  const styles = useStyles();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={[styles.filterChip, selected && styles.filterChipSelected]}
+    >
+      {color ? <View style={[styles.filterDot, { backgroundColor: color }]} /> : null}
+      <AppText style={selected && styles.filterChipTextSelected} variant="caption">
+        {label}
+      </AppText>
+    </Pressable>
   );
 }
 
 const useStyles = createThemedStyles((theme) => ({
   content: {
     flexGrow: 1,
-    gap: theme.spacing.xl,
     marginHorizontal: 'auto',
     maxWidth: 720,
+    paddingBottom: theme.spacing.xxl,
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl,
     width: '100%',
+  },
+  headerContent: {
+    gap: theme.spacing.md,
+    paddingBottom: theme.spacing.lg,
+    paddingTop: theme.spacing.xl,
+  },
+  titleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+    justifyContent: 'space-between',
+  },
+  addButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.brand.primary,
+    borderRadius: theme.radius.pill,
+    height: 46,
+    justifyContent: 'center',
+    width: 46,
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  searchBox: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.surface,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    minHeight: 50,
+    paddingHorizontal: theme.spacing.md,
+  },
+  searchInput: {
+    color: theme.colors.content.primary,
+    flex: 1,
+    fontSize: 16,
+    minHeight: 48,
+  },
+  filterRow: {
+    gap: theme.spacing.xs,
+    paddingRight: theme.spacing.md,
+  },
+  filterChip: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.surface,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: theme.spacing.xs,
+    minHeight: 38,
+    paddingHorizontal: theme.spacing.md,
+  },
+  filterChipSelected: {
+    backgroundColor: theme.colors.brand.soft,
+    borderColor: theme.colors.brand.primary,
+  },
+  filterChipTextSelected: {
+    color: theme.colors.brand.primary,
+  },
+  filterDot: {
+    borderRadius: theme.radius.pill,
+    height: 8,
+    width: 8,
+  },
+  separator: {
+    height: theme.spacing.sm,
+  },
+  listFooter: {
+    marginTop: theme.spacing.lg,
   },
 }));

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui';
 import { useLocalData } from '@/data';
 import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { useVocabulary } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 const ACCOUNT_BENEFITS = [
@@ -24,8 +25,8 @@ const ACCOUNT_BENEFITS = [
 export default function SettingsScreen() {
   const styles = useStyles();
   const { resolvedMode, theme } = useAppTheme();
-  const { categoryCount, databaseVersion, identity, setOnboardingCompleted, wordCount } =
-    useLocalData();
+  const { databaseVersion, identity, setOnboardingCompleted } = useLocalData();
+  const { categories, wordCount } = useVocabulary();
   const [isReplayingWelcome, setIsReplayingWelcome] = useState(false);
 
   async function replayWelcome() {
@@ -122,7 +123,7 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.dataRow}>
               <AppText tone="secondary">Categories</AppText>
-              <AppText variant="label">{categoryCount}</AppText>
+              <AppText variant="label">{categories.length}</AppText>
             </View>
             <View style={styles.dataRow}>
               <AppText tone="secondary">Guest ID</AppText>
@@ -132,6 +133,11 @@ export default function SettingsScreen() {
               <AppText tone="secondary">Database</AppText>
               <AppText variant="label">Version {databaseVersion}</AppText>
             </View>
+            <AppButton
+              label="Manage categories"
+              onPress={() => router.push('/categories')}
+              variant="secondary"
+            />
           </Card>
         </View>
 

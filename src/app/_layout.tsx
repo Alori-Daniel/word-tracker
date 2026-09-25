@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LocalDataProvider, useLocalData } from '@/data';
+import { VocabularyProvider } from '@/features/vocabulary';
 import { AppThemeProvider, useAppTheme } from '@/theme';
 
 function RootNavigator() {
@@ -26,7 +27,9 @@ function ThemedApplication() {
 
   return (
     <AppThemeProvider initialMode={settings.themeMode} onModeChange={setThemeMode}>
-      <RootNavigator />
+      <VocabularyProvider>
+        <RootNavigator />
+      </VocabularyProvider>
     </AppThemeProvider>
   );
 }

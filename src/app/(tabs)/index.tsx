@@ -1,16 +1,21 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
+import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { AppButton, AppText, Card, PageHeader, Screen } from '@/components/ui';
-import { useLocalData } from '@/data';
 import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { useVocabulary, WordListItem } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 export default function HomeScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
-  const { categoryCount, wordCount } = useLocalData();
+  const { categories, recentWords, wordCount } = useVocabulary();
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories],
+  );
 
   return (
     <Screen edges={['top', 'right', 'left']}>
@@ -27,14 +32,16 @@ export default function HomeScreen() {
           </View>
           <View style={styles.heroCopy}>
             <AppText style={styles.heroTitle} variant="subtitle">
-              Start your personal dictionary
+              {wordCount === 0 ? 'Start your personal dictionary' : 'Keep building your vault'}
             </AppText>
             <AppText style={styles.heroDescription}>
-              Add the first word you want to keep, define, and review.
+              {wordCount === 0
+                ? 'Add the first word you want to keep, define, and review.'
+                : 'Capture another word while it is still fresh.'}
             </AppText>
           </View>
           <AppButton
-            label="Add your first word"
+            label={wordCount === 0 ? 'Add your first word' : 'Add another word'}
             onPress={() => router.push('/(tabs)/add')}
             variant="secondary"
           />
@@ -48,12 +55,37 @@ export default function HomeScreen() {
             </AppText>
           </Card>
           <Card style={styles.statCard}>
-            <AppText variant="title">{categoryCount}</AppText>
+            <AppText variant="title">{categories.length}</AppText>
             <AppText tone="secondary" variant="caption">
               CATEGORIES
             </AppText>
           </Card>
         </View>
+
+        {recentWords.length > 0 ? (
+          <View style={styles.recentSection}>
+            <View style={styles.recentHeading}>
+              <AppText variant="subtitle">Recently added</AppText>
+              <AppButton
+                label="View all"
+                onPress={() => router.push('/(tabs)/library')}
+                variant="ghost"
+              />
+            </View>
+            <View style={styles.recentList}>
+              {recentWords.slice(0, 3).map((word) => (
+                <WordListItem
+                  category={word.categoryId ? categoryById.get(word.categoryId) : undefined}
+                  key={word.id}
+                  onPress={() =>
+                    router.push({ pathname: '/word/[id]', params: { id: word.id } })
+                  }
+                  word={word}
+                />
+              ))}
+            </View>
+          </View>
+        ) : null}
 
         <Card style={styles.accountCard}>
           <View style={styles.accountIcon}>
@@ -110,6 +142,17 @@ const useStyles = createThemedStyles((theme) => ({
   statCard: {
     flex: 1,
     gap: theme.spacing.xs,
+  },
+  recentSection: {
+    gap: theme.spacing.sm,
+  },
+  recentHeading: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  recentList: {
+    gap: theme.spacing.sm,
   },
   accountCard: {
     alignItems: 'center',
