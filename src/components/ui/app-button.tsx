@@ -30,7 +30,7 @@ export function AppButton({
       style={({ pressed }) => [
         styles.base,
         styles[variant],
-        pressed && !isDisabled && styles.pressed,
+        pressed && !isDisabled && (isPrimary ? styles.primaryPressed : styles.pressed),
         isDisabled && styles.disabled,
       ]}
       {...props}
@@ -41,7 +41,7 @@ export function AppButton({
             color={isPrimary ? theme.colors.brand.onPrimary : theme.colors.brand.primary}
           />
         ) : (
-          <AppText variant="label" tone={isPrimary ? 'inverse' : 'primary'}>
+          <AppText style={isPrimary && styles.primaryLabel} variant="label">
             {label}
           </AppText>
         )}
@@ -65,6 +65,12 @@ const useStyles = createThemedStyles((theme) => ({
   },
   primary: {
     backgroundColor: theme.colors.brand.primary,
+  },
+  primaryLabel: {
+    color: theme.colors.brand.onPrimary,
+  },
+  primaryPressed: {
+    backgroundColor: theme.colors.brand.pressed,
   },
   secondary: {
     backgroundColor: theme.colors.brand.soft,

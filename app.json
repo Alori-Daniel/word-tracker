@@ -27,8 +27,17 @@
       "typedRoutes": true
     },
     "plugins": [
-      "expo-router",
-      "expo-status-bar"
+      [
+        "expo-router",
+        {
+          "headers": {
+            "Cross-Origin-Embedder-Policy": "credentialless",
+            "Cross-Origin-Opener-Policy": "same-origin"
+          }
+        }
+      ],
+      "expo-status-bar",
+      "expo-sqlite"
     ]
   }
 }

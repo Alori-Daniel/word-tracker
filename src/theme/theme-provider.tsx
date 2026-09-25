@@ -2,6 +2,7 @@ import { ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useMemo,
   useState,
@@ -28,11 +29,29 @@ const AppThemeContext = createContext<AppThemeContextValue | null>(null);
 
 type AppThemeProviderProps = PropsWithChildren<{
   initialMode?: ThemeMode;
+  onModeChange?: (mode: ThemeMode) => Promise<void> | void;
 }>;
 
-export function AppThemeProvider({ children, initialMode = 'system' }: AppThemeProviderProps) {
+export function AppThemeProvider({
+  children,
+  initialMode = 'system',
+  onModeChange,
+}: AppThemeProviderProps) {
   const systemColorScheme = useColorScheme();
-  const [mode, setMode] = useState<ThemeMode>(initialMode);
+  const [mode, setStoredMode] = useState<ThemeMode>(initialMode);
+
+  const setMode = useCallback(
+    (nextMode: ThemeMode) => {
+      setStoredMode(nextMode);
+
+      if (onModeChange) {
+        void Promise.resolve(onModeChange(nextMode)).catch((error: unknown) => {
+          console.error('Unable to persist the theme preference.', error);
+        });
+      }
+    },
+    [onModeChange],
+  );
 
   const resolvedMode: ResolvedThemeMode =
     mode === 'system' ? (systemColorScheme === 'dark' ? 'dark' : 'light') : mode;
@@ -40,7 +59,7 @@ export function AppThemeProvider({ children, initialMode = 'system' }: AppThemeP
 
   const value = useMemo<AppThemeContextValue>(
     () => ({ mode, resolvedMode, setMode, theme }),
-    [mode, resolvedMode, theme],
+    [mode, resolvedMode, setMode, theme],
   );
   const navigationTheme = useMemo(() => createNavigationTheme(theme), [theme]);
 

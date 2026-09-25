@@ -1,12 +1,14 @@
 import { DarkTheme, DefaultTheme, type Theme as NavigationTheme } from 'expo-router';
 
+import type { ThemeMode } from '@/domain/settings';
+
 import { darkColors, lightColors, type AppColors } from './colors';
 import { radius } from './radius';
 import { shadows } from './shadows';
 import { spacing } from './spacing';
 import { typography } from './typography';
 
-export type ThemeMode = 'system' | 'light' | 'dark';
+export type { ThemeMode } from '@/domain/settings';
 export type ResolvedThemeMode = Exclude<ThemeMode, 'system'>;
 
 export type AppTheme = {
