@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
+import type { LinkAccountInput } from '@/domain/account';
 import type { LocalSettings, ThemeMode } from '@/domain/settings';
 import type { GuestIdentity } from '@/domain/vocabulary';
 import { darkColors, lightColors } from '@/theme/colors';
@@ -29,6 +30,9 @@ type LocalDataContextValue = {
   repositories: LocalRepositories;
   databaseVersion: number;
   categoryCount: number;
+  dataRevision: number;
+  linkAccount: (account: LinkAccountInput) => Promise<void>;
+  notifyCloudDataChanged: () => void;
   wordCount: number;
   setOnboardingCompleted: (completed: boolean) => Promise<void>;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
@@ -36,7 +40,7 @@ type LocalDataContextValue = {
 
 type LocalDataSnapshot = Omit<
   LocalDataContextValue,
-  'setOnboardingCompleted' | 'setThemeMode'
+  'linkAccount' | 'notifyCloudDataChanged' | 'setOnboardingCompleted' | 'setThemeMode'
 >;
 
 type BootstrapState =
@@ -107,6 +111,7 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
               repositories,
               databaseVersion: DATABASE_VERSION,
               categoryCount: categories.length,
+              dataRevision: 0,
               wordCount,
             },
           });
@@ -172,12 +177,59 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
     [state],
   );
 
+  const linkAccount = useCallback(
+    async (account: LinkAccountInput) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      const bootstrapRepositories = createBootstrapRepositories(database);
+      const identity = await bootstrapRepositories.identity.linkAccount(account);
+      const repositories = createRepositories(database, identity);
+
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                identity,
+                repositories,
+                dataRevision: current.value.dataRevision + 1,
+              },
+            }
+          : current,
+      );
+    },
+    [database, state],
+  );
+
+  const notifyCloudDataChanged = useCallback(() => {
+    setState((current) =>
+      current.status === 'ready'
+        ? {
+            ...current,
+            value: {
+              ...current.value,
+              dataRevision: current.value.dataRevision + 1,
+            },
+          }
+        : current,
+    );
+  }, []);
+
   const contextValue = useMemo<LocalDataContextValue | null>(
     () =>
       state.status === 'ready'
-        ? { ...state.value, setOnboardingCompleted, setThemeMode }
+        ? {
+            ...state.value,
+            linkAccount,
+            notifyCloudDataChanged,
+            setOnboardingCompleted,
+            setThemeMode,
+          }
         : null,
-    [setOnboardingCompleted, setThemeMode, state],
+    [linkAccount, notifyCloudDataChanged, setOnboardingCompleted, setThemeMode, state],
   );
 
   if (state.status === 'loading') {

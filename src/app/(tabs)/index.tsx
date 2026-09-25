@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { AppButton, AppText, Card, PageHeader, Screen } from '@/components/ui';
-import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { useAccount } from '@/features/auth';
 import { useReview } from '@/features/review';
 import { useVocabulary, WordListItem } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
@@ -12,6 +12,14 @@ import { createThemedStyles, useAppTheme } from '@/theme';
 export default function HomeScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
+  const {
+    account,
+    isConfigured: isAccountConfigured,
+    isSigningIn,
+    signInWithGoogle,
+    syncNow,
+    syncState,
+  } = useAccount();
   const { dueCount } = useReview();
   const { categories, recentWords, wordCount } = useVocabulary();
   const categoryById = useMemo(
@@ -115,12 +123,26 @@ export default function HomeScreen() {
             <MaterialIcons color={theme.colors.brand.primary} name="cloud-done" size={24} />
           </View>
           <View style={styles.accountCopy}>
-            <AppText variant="label">Your vault is local</AppText>
+            <AppText variant="label">
+              {account ? 'Your vault is backed up' : 'Your vault is local'}
+            </AppText>
             <AppText tone="secondary" variant="caption">
-              Sign in later to back up and sync your words across devices.
+              {account
+                ? syncState.status === 'syncing'
+                  ? 'Syncing your latest changes…'
+                  : `Connected as ${account.email}`
+                : 'Sign in when you want backup and sync across devices.'}
             </AppText>
           </View>
-          <AppButton label="Learn more" onPress={showGoogleSignInNotice} variant="ghost" />
+          <AppButton
+            disabled={!account && !isAccountConfigured}
+            label={account ? 'Sync' : 'Google'}
+            loading={account ? syncState.status === 'syncing' : isSigningIn}
+            onPress={() =>
+              void (account ? syncNow() : signInWithGoogle()).catch(() => undefined)
+            }
+            variant="ghost"
+          />
         </Card>
       </ScrollView>
     </Screen>

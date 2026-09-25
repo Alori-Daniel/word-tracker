@@ -76,7 +76,7 @@ AI content is deliberately presented as a draft, with a reminder that it can be 
 The code boundaries are implemented and testable, but no live gateway is deployed from this repository. A live connection requires infrastructure and credentials that should not be guessed or committed here:
 
 - a deployed HTTPS gateway URL;
-- Google sign-in issuing an account token;
+- a configured Supabase project so the implemented Google sign-in flow can issue an account token;
 - a server-side subscription and quota check;
 - an OpenAI project API key stored in the gateway's secret manager;
 - a server-selected model that supports Structured Outputs.
@@ -97,7 +97,7 @@ The deployment adapter around the supplied reference handler should perform thes
 6. Record the gateway request ID, outcome, token usage, and cost metadata without logging the word's private context.
 7. Refund or reconcile the reserved request if the provider call fails, according to the billing policy.
 
-The handler is framework-independent and uses standard `Request`, `Response`, and `fetch` APIs. A small Supabase Edge Function wrapper can supply the authentication and quota callbacks. That wrapper should be implemented alongside the account/cloud stage so it uses the real database schema and access policies instead of temporary security logic.
+The handler is framework-independent and uses standard `Request`, `Response`, and `fetch` APIs. The mobile AI client now receives the current Supabase access token. A small Supabase Edge Function wrapper still needs to verify that token and supply the authorization and quota callbacks before live AI is enabled.
 
 ## Configuration: public URL versus secret key
 

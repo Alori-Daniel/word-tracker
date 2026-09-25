@@ -16,6 +16,7 @@ import type {
   VocabularyReviewHistoryItem,
   VocabularyWord,
 } from '@/domain/vocabulary';
+import { useAccount } from '@/features/auth';
 import { useVocabulary } from '@/features/vocabulary';
 
 type ReviewContextValue = {
@@ -37,6 +38,7 @@ const ReviewContext = createContext<ReviewContextValue | null>(null);
 
 export function ReviewProvider({ children }: PropsWithChildren) {
   const { repositories } = useLocalData();
+  const { queueSync } = useAccount();
   const { refresh: refreshVocabulary, revision: vocabularyRevision } = useVocabulary();
   const [dueWords, setDueWords] = useState<VocabularyWord[]>([]);
   const [dueCount, setDueCount] = useState(0);
@@ -132,6 +134,7 @@ export function ReviewProvider({ children }: PropsWithChildren) {
         setRecentReviews((current) => [{ ...review, word: word.word }, ...current].slice(0, 5));
         await refreshVocabulary();
         await refresh();
+        queueSync();
 
         return schedule;
       } catch (nextError) {
@@ -143,7 +146,7 @@ export function ReviewProvider({ children }: PropsWithChildren) {
         setIsSubmitting(false);
       }
     },
-    [isSubmitting, refresh, refreshVocabulary, repositories],
+    [isSubmitting, queueSync, refresh, refreshVocabulary, repositories],
   );
 
   const resetSession = useCallback(() => setReviewedThisSession(0), []);

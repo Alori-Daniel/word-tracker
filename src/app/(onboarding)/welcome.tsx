@@ -5,7 +5,7 @@ import { ScrollView, View } from 'react-native';
 
 import { AppButton, AppText, Card, Screen } from '@/components/ui';
 import { useLocalData } from '@/data';
-import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { GoogleSignInButton, useAccount } from '@/features/auth';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 const BENEFITS = ['Save words as you find them', 'Organize your vocabulary', 'Review at your own pace'] as const;
@@ -14,6 +14,7 @@ export default function WelcomeScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
   const { setOnboardingCompleted } = useLocalData();
+  const { errorMessage: accountError, isConfigured: isAccountConfigured } = useAccount();
   const [isContinuing, setIsContinuing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -28,6 +29,15 @@ export default function WelcomeScreen() {
       setErrorMessage('We could not finish setup. Your data is safe—please try again.');
     } finally {
       setIsContinuing(false);
+    }
+  }
+
+  async function finishGoogleSignIn() {
+    try {
+      await setOnboardingCompleted(true);
+      router.replace('/(tabs)');
+    } catch {
+      setErrorMessage('You are signed in, but setup could not finish. Please try again.');
     }
   }
 
@@ -81,9 +91,9 @@ export default function WelcomeScreen() {
         </Card>
 
         <View style={styles.actions}>
-          {errorMessage ? (
+          {errorMessage || accountError ? (
             <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
-              {errorMessage}
+              {errorMessage ?? accountError}
             </AppText>
           ) : null}
           <AppButton
@@ -91,21 +101,11 @@ export default function WelcomeScreen() {
             loading={isContinuing}
             onPress={() => void continueAsGuest()}
           />
-          <AppButton
-            accessibilityLabel="Sign in with Google"
-            label="Sign in with Google"
-            leftAccessory={
-              <View style={styles.googleMark}>
-                <AppText style={styles.googleMarkText} variant="label">
-                  G
-                </AppText>
-              </View>
-            }
-            onPress={showGoogleSignInNotice}
-            variant="secondary"
-          />
+          <GoogleSignInButton onSignedIn={finishGoogleSignIn} />
           <AppText style={styles.privacyNote} tone="tertiary" variant="caption">
-            Guest data stays on this device. You can connect an account later without losing it.
+            {isAccountConfigured
+              ? 'Guest data stays on this device. You can connect an account later without losing it.'
+              : 'Guest mode is ready. Google sign-in will activate after cloud configuration is added.'}
           </AppText>
         </View>
       </ScrollView>
@@ -184,18 +184,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   actions: {
     gap: theme.spacing.sm,
-  },
-  googleMark: {
-    alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    borderRadius: theme.radius.pill,
-    height: 24,
-    justifyContent: 'center',
-    width: 24,
-  },
-  googleMarkText: {
-    color: '#4285F4',
-    fontWeight: '700',
   },
   errorText: {
     color: theme.colors.semantic.error.foreground,

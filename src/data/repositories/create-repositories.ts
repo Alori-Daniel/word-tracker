@@ -9,6 +9,7 @@ import type { RepositoryDependencies } from './repository-dependencies';
 import { ReviewRepository } from './review-repository';
 import { SettingsRepository } from './settings-repository';
 import { WordRepository } from './word-repository';
+import { VaultSyncRepository } from './vault-sync-repository';
 
 export function createRepositoryDependencies(): RepositoryDependencies {
   return {
@@ -33,6 +34,7 @@ export function createRepositories(database: SQLiteDatabase, identity: GuestIden
     categories: new CategoryRepository(database, identity, dependencies),
     reviews: new ReviewRepository(database, identity, dependencies),
     settings: new SettingsRepository(database, dependencies),
+    sync: new VaultSyncRepository(database, identity),
     words: new WordRepository(database, identity, dependencies),
   };
 }

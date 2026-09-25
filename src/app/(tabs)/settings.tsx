@@ -12,7 +12,7 @@ import {
   ThemeModeSelector,
 } from '@/components/ui';
 import { useLocalData } from '@/data';
-import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { GoogleSignInButton, useAccount } from '@/features/auth';
 import { useVocabulary } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
@@ -26,8 +26,17 @@ export default function SettingsScreen() {
   const styles = useStyles();
   const { resolvedMode, theme } = useAppTheme();
   const { databaseVersion, identity, setOnboardingCompleted } = useLocalData();
+  const {
+    account,
+    errorMessage: accountError,
+    isConfigured: isAccountConfigured,
+    signOut,
+    syncNow,
+    syncState,
+  } = useAccount();
   const { categories, wordCount } = useVocabulary();
   const [isReplayingWelcome, setIsReplayingWelcome] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function replayWelcome() {
     setIsReplayingWelcome(true);
@@ -40,6 +49,12 @@ export default function SettingsScreen() {
     } finally {
       setIsReplayingWelcome(false);
     }
+  }
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    await signOut();
+    setIsSigningOut(false);
   }
 
   return (
@@ -59,45 +74,91 @@ export default function SettingsScreen() {
                 <MaterialIcons color={theme.colors.brand.primary} name="person" size={26} />
               </View>
               <View style={styles.accountCopy}>
-                <AppText variant="label">Guest profile</AppText>
+                <AppText variant="label">
+                  {account?.displayName ?? account?.email ?? 'Guest profile'}
+                </AppText>
                 <AppText tone="secondary" variant="caption">
-                  Your words stay private on this device.
+                  {account
+                    ? account.email
+                    : 'Your words stay private on this device.'}
                 </AppText>
               </View>
               <View style={styles.localBadge}>
                 <AppText style={styles.localBadgeText} variant="caption">
-                  LOCAL
+                  {account ? account.subscriptionStatus.toUpperCase() : 'LOCAL'}
                 </AppText>
               </View>
             </View>
 
-            <View style={styles.benefitList}>
-              {ACCOUNT_BENEFITS.map((benefit) => (
-                <View key={benefit} style={styles.benefitRow}>
-                  <MaterialIcons
-                    color={theme.colors.semantic.success.foreground}
-                    name="check"
-                    size={18}
-                  />
-                  <AppText style={styles.benefitText} tone="secondary">
-                    {benefit}
-                  </AppText>
+            {account ? (
+              <>
+                <View style={styles.syncSummary}>
+                  <View style={styles.dataRow}>
+                    <AppText tone="secondary">Cloud backup</AppText>
+                    <AppText variant="label">
+                      {syncState.status === 'syncing' ? 'Syncing…' : 'Connected'}
+                    </AppText>
+                  </View>
+                  <View style={styles.dataRow}>
+                    <AppText tone="secondary">Last synced</AppText>
+                    <AppText variant="label">
+                      {formatSyncTime(syncState.lastSyncedAt)}
+                    </AppText>
+                  </View>
                 </View>
-              ))}
-            </View>
+                {syncState.message ? (
+                  <AppText
+                    accessibilityRole={syncState.status === 'error' ? 'alert' : undefined}
+                    style={syncState.status === 'error' ? styles.errorText : undefined}
+                    tone={syncState.status === 'error' ? 'primary' : 'secondary'}
+                    variant="caption"
+                  >
+                    {syncState.message}
+                  </AppText>
+                ) : null}
+                <AppButton
+                  label="Sync now"
+                  loading={syncState.status === 'syncing'}
+                  onPress={() => void syncNow().catch(() => undefined)}
+                  variant="secondary"
+                />
+                <AppButton
+                  label="Sign out"
+                  loading={isSigningOut}
+                  onPress={() => void handleSignOut()}
+                  variant="ghost"
+                />
+              </>
+            ) : (
+              <>
+                <View style={styles.benefitList}>
+                  {ACCOUNT_BENEFITS.map((benefit) => (
+                    <View key={benefit} style={styles.benefitRow}>
+                      <MaterialIcons
+                        color={theme.colors.semantic.success.foreground}
+                        name="check"
+                        size={18}
+                      />
+                      <AppText style={styles.benefitText} tone="secondary">
+                        {benefit}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+                <GoogleSignInButton variant="primary" />
+                {!isAccountConfigured ? (
+                  <AppText tone="tertiary" variant="caption">
+                    Google sign-in needs Supabase configuration for this build.
+                  </AppText>
+                ) : null}
+              </>
+            )}
 
-            <AppButton
-              accessibilityLabel="Sign in with Google"
-              label="Sign in with Google"
-              leftAccessory={
-                <View style={styles.googleMark}>
-                  <AppText style={styles.googleMarkText} variant="label">
-                    G
-                  </AppText>
-                </View>
-              }
-              onPress={showGoogleSignInNotice}
-            />
+            {accountError ? (
+              <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
+                {accountError}
+              </AppText>
+            ) : null}
           </Card>
         </View>
 
@@ -209,17 +270,14 @@ const useStyles = createThemedStyles((theme) => ({
   benefitText: {
     flex: 1,
   },
-  googleMark: {
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: theme.radius.pill,
-    height: 24,
-    justifyContent: 'center',
-    width: 24,
+  syncSummary: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
+    gap: theme.spacing.sm,
+    paddingTop: theme.spacing.lg,
   },
-  googleMarkText: {
-    color: '#4285F4',
-    fontWeight: '700',
+  errorText: {
+    color: theme.colors.semantic.error.foreground,
   },
   settingCopy: {
     gap: theme.spacing.xxs,
@@ -233,3 +291,12 @@ const useStyles = createThemedStyles((theme) => ({
     paddingBottom: theme.spacing.sm,
   },
 }));
+
+function formatSyncTime(value: string | null): string {
+  if (!value) return 'Not yet';
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value));
+}

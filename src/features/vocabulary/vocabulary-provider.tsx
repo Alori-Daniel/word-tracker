@@ -16,6 +16,7 @@ import type {
   VocabularyWord,
   WordListOptions,
 } from '@/domain/vocabulary';
+import { useAccount } from '@/features/auth';
 
 type CreateCategoryInput = {
   color: string;
@@ -42,7 +43,8 @@ type VocabularyContextValue = {
 const VocabularyContext = createContext<VocabularyContextValue | null>(null);
 
 export function VocabularyProvider({ children }: PropsWithChildren) {
-  const { repositories } = useLocalData();
+  const { dataRevision, repositories } = useLocalData();
+  const { queueSync } = useAccount();
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentWords, setRecentWords] = useState<VocabularyWord[]>([]);
   const [wordCount, setWordCount] = useState(0);
@@ -79,51 +81,56 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [refresh]);
+  }, [dataRevision, refresh]);
 
   const createWord = useCallback(
     async (input: CreateWordInput) => {
       const word = await repositories.words.create(input);
       await refresh();
+      queueSync();
       return word;
     },
-    [refresh, repositories],
+    [queueSync, refresh, repositories],
   );
 
   const updateWord = useCallback(
     async (id: string, input: UpdateWordInput) => {
       const word = await repositories.words.update(id, input);
       await refresh();
+      queueSync();
       return word;
     },
-    [refresh, repositories],
+    [queueSync, refresh, repositories],
   );
 
   const deleteWord = useCallback(
     async (id: string) => {
       const deleted = await repositories.words.softDelete(id);
       await refresh();
+      queueSync();
       return deleted;
     },
-    [refresh, repositories],
+    [queueSync, refresh, repositories],
   );
 
   const createCategory = useCallback(
     async (input: CreateCategoryInput) => {
       const category = await repositories.categories.create(input);
       await refresh();
+      queueSync();
       return category;
     },
-    [refresh, repositories],
+    [queueSync, refresh, repositories],
   );
 
   const deleteCategory = useCallback(
     async (id: string) => {
       const deleted = await repositories.categories.softDelete(id);
       await refresh();
+      queueSync();
       return deleted;
     },
-    [refresh, repositories],
+    [queueSync, refresh, repositories],
   );
 
   const listWords = useCallback(
