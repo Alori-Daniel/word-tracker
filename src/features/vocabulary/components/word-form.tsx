@@ -13,11 +13,13 @@ import {
 import { AppButton, AppText, Card } from '@/components/ui';
 import { DuplicateWordError } from '@/data';
 import { LEARNING_STATUSES, type CreateWordInput } from '@/domain/vocabulary';
+import { AiWordAssistPanel, applyAiSuggestionToWordForm } from '@/features/ai';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 import { useVocabulary } from '../vocabulary-provider';
 import {
   EMPTY_WORD_FORM_VALUES,
+  getWordFormValidationError,
   toWordInput,
   type WordFormValues,
 } from '../word-form-values';
@@ -25,7 +27,6 @@ import {
 type WordFormProps = {
   initialValues?: WordFormValues;
   onSubmit: (input: CreateWordInput) => Promise<void>;
-  quickSubmitLabel?: string;
   resetOnSuccess?: boolean;
   submitLabel: string;
 };
@@ -33,7 +34,6 @@ type WordFormProps = {
 export function WordForm({
   initialValues = EMPTY_WORD_FORM_VALUES,
   onSubmit,
-  quickSubmitLabel,
   resetOnSuccess = false,
   submitLabel,
 }: WordFormProps) {
@@ -43,14 +43,17 @@ export function WordForm({
   const [values, setValues] = useState(initialValues);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showMoreDetails, setShowMoreDetails] = useState(() => hasAdvancedDetails(initialValues));
 
   function updateValue<Key extends keyof WordFormValues>(key: Key, value: WordFormValues[Key]) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
   async function submit() {
-    if (!values.word.normalize('NFKC').trim()) {
-      setErrorMessage('Enter the word you want to save.');
+    const validationError = getWordFormValidationError(values);
+
+    if (validationError) {
+      setErrorMessage(validationError);
       return;
     }
 
@@ -77,7 +80,12 @@ export function WordForm({
   return (
     <View style={styles.form}>
       <Card style={styles.section}>
-        <AppText variant="subtitle">Word</AppText>
+        <View style={styles.sectionHeadingCopy}>
+          <AppText variant="subtitle">Quick add</AppText>
+          <AppText tone="secondary" variant="caption">
+            Only the word and meaning are required.
+          </AppText>
+        </View>
         <FormTextField
           autoCapitalize="none"
           autoCorrect={false}
@@ -86,49 +94,43 @@ export function WordForm({
           maxLength={120}
           onChangeText={(value) => updateValue('word', value)}
           placeholder="e.g. ephemeral"
+          required
           value={values.word}
         />
-        {quickSubmitLabel ? (
-          <AppButton
-            label={quickSubmitLabel}
-            loading={isSaving}
-            onPress={() => void submit()}
-            variant="secondary"
-          />
-        ) : null}
         <FormTextField
-          autoCapitalize="none"
-          label="Pronunciation"
-          maxLength={160}
-          onChangeText={(value) => updateValue('pronunciation', value)}
-          placeholder="e.g. ih-FEM-er-uhl"
-          value={values.pronunciation}
-        />
-        <FormTextField
-          label="Definition"
+          label="Meaning"
           multiline
           onChangeText={(value) => updateValue('definition', value)}
-          placeholder="What does it mean?"
+          placeholder="What does this word mean?"
+          required
           value={values.definition}
         />
-        <FormTextField
-          label="Simple definition"
-          multiline
-          onChangeText={(value) => updateValue('simpleDefinition', value)}
-          placeholder="Explain it in your own words"
-          value={values.simpleDefinition}
-        />
-        <FormTextField
-          autoCapitalize="none"
-          label="Part of speech"
-          maxLength={80}
-          onChangeText={(value) => updateValue('partOfSpeech', value)}
-          placeholder="noun, verb, adjective…"
-          value={values.partOfSpeech}
+        <AiWordAssistPanel
+          context={values.sourceSentence}
+          existingDefinition={values.definition}
+          key={values.word}
+          onApply={(suggestion) =>
+            setValues((current) => applyAiSuggestionToWordForm(current, suggestion))
+          }
+          word={values.word}
         />
       </Card>
 
       <Card style={styles.section}>
+        <AppText variant="subtitle">Learning status</AppText>
+        <View style={styles.wrappedChoices}>
+          {LEARNING_STATUSES.map((status) => (
+            <ChoiceChip
+              key={status}
+              label={status[0].toUpperCase() + status.slice(1)}
+              onPress={() => updateValue('status', status)}
+              selected={values.status === status}
+            />
+          ))}
+        </View>
+
+        <View style={styles.sectionDivider} />
+
         <View style={styles.sectionHeading}>
           <View style={styles.sectionHeadingCopy}>
             <AppText variant="subtitle">Category</AppText>
@@ -166,88 +168,118 @@ export function WordForm({
             />
           ))}
         </ScrollView>
-      </Card>
 
-      <Card style={styles.section}>
-        <AppText variant="subtitle">Learning status</AppText>
-        <View style={styles.wrappedChoices}>
-          {LEARNING_STATUSES.map((status) => (
-            <ChoiceChip
-              key={status}
-              label={status[0].toUpperCase() + status.slice(1)}
-              onPress={() => updateValue('status', status)}
-              selected={values.status === status}
-            />
-          ))}
-        </View>
-        <View style={styles.favoriteRow}>
-          <View style={styles.favoriteCopy}>
-            <AppText variant="label">Favourite</AppText>
-            <AppText tone="secondary" variant="caption">
-              Keep this word easy to find.
-            </AppText>
-          </View>
-          <Switch
-            accessibilityLabel="Favourite word"
-            onValueChange={(value) => updateValue('isFavorite', value)}
-            thumbColor={theme.colors.background.surface}
-            trackColor={{
-              false: theme.colors.border.default,
-              true: theme.colors.brand.primary,
-            }}
-            value={values.isFavorite}
-          />
-        </View>
-      </Card>
+        <View style={styles.sectionDivider} />
 
-      <Card style={styles.section}>
-        <AppText variant="subtitle">Language connections</AppText>
         <FormTextField
-          label="Example sentences"
-          multiline
-          onChangeText={(value) => updateValue('examples', value)}
-          placeholder="One example per line"
-          value={values.examples}
-        />
-        <FormTextField
-          label="Synonyms"
-          multiline
-          onChangeText={(value) => updateValue('synonyms', value)}
-          placeholder="Separate with commas"
-          value={values.synonyms}
-        />
-        <FormTextField
-          label="Antonyms"
-          multiline
-          onChangeText={(value) => updateValue('antonyms', value)}
-          placeholder="Separate with commas"
-          value={values.antonyms}
-        />
-      </Card>
-
-      <Card style={styles.section}>
-        <AppText variant="subtitle">Context</AppText>
-        <FormTextField
-          label="Where did you find it?"
+          label="Where did you find it? (optional)"
           maxLength={160}
           onChangeText={(value) => updateValue('source', value)}
           placeholder="Book, article, conversation…"
           value={values.source}
         />
-        <FormTextField
-          label="Original sentence"
-          multiline
-          onChangeText={(value) => updateValue('sourceSentence', value)}
-          placeholder="The sentence where the word appeared"
-          value={values.sourceSentence}
-        />
-        <FormTextField
-          label="Personal notes"
-          multiline
-          onChangeText={(value) => updateValue('personalNotes', value)}
-          placeholder="A memory trick or anything useful"
-          value={values.personalNotes}
-        />
+      </Card>
+
+      <Card style={styles.section}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: showMoreDetails }}
+          onPress={() => setShowMoreDetails((current) => !current)}
+          style={styles.moreDetailsButton}
+        >
+          <View style={styles.moreDetailsCopy}>
+            <AppText variant="subtitle">More details</AppText>
+            <AppText tone="secondary" variant="caption">
+              Pronunciation, examples, related words and notes
+            </AppText>
+          </View>
+          <MaterialIcons
+            color={theme.colors.content.secondary}
+            name={showMoreDetails ? 'expand-less' : 'expand-more'}
+            size={24}
+          />
+        </Pressable>
+
+        {showMoreDetails ? (
+          <View style={styles.advancedFields}>
+            <FormTextField
+              autoCapitalize="none"
+              label="Pronunciation"
+              maxLength={160}
+              onChangeText={(value) => updateValue('pronunciation', value)}
+              placeholder="e.g. ih-FEM-er-uhl"
+              value={values.pronunciation}
+            />
+            <FormTextField
+              label="Simple definition"
+              multiline
+              onChangeText={(value) => updateValue('simpleDefinition', value)}
+              placeholder="Explain it in your own words"
+              value={values.simpleDefinition}
+            />
+            <FormTextField
+              autoCapitalize="none"
+              label="Part of speech"
+              maxLength={80}
+              onChangeText={(value) => updateValue('partOfSpeech', value)}
+              placeholder="noun, verb, adjective…"
+              value={values.partOfSpeech}
+            />
+            <FormTextField
+              label="Example sentences"
+              multiline
+              onChangeText={(value) => updateValue('examples', value)}
+              placeholder="One example per line"
+              value={values.examples}
+            />
+            <FormTextField
+              label="Synonyms"
+              multiline
+              onChangeText={(value) => updateValue('synonyms', value)}
+              placeholder="Separate with commas"
+              value={values.synonyms}
+            />
+            <FormTextField
+              label="Antonyms"
+              multiline
+              onChangeText={(value) => updateValue('antonyms', value)}
+              placeholder="Separate with commas"
+              value={values.antonyms}
+            />
+            <FormTextField
+              label="Original sentence"
+              multiline
+              onChangeText={(value) => updateValue('sourceSentence', value)}
+              placeholder="The sentence where the word appeared"
+              value={values.sourceSentence}
+            />
+            <FormTextField
+              label="Personal notes"
+              multiline
+              onChangeText={(value) => updateValue('personalNotes', value)}
+              placeholder="A memory trick or anything useful"
+              value={values.personalNotes}
+            />
+            <View style={styles.favoriteRow}>
+              <View style={styles.favoriteCopy}>
+                <AppText variant="label">Favourite</AppText>
+                <AppText tone="secondary" variant="caption">
+                  Keep this word easy to find.
+                </AppText>
+              </View>
+              <Switch
+                accessibilityLabel="Favourite word"
+                onValueChange={(value) => updateValue('isFavorite', value)}
+                thumbColor={theme.colors.background.surface}
+                trackColor={{
+                  false: theme.colors.border.default,
+                  true: theme.colors.brand.primary,
+                }}
+                value={values.isFavorite}
+              />
+            </View>
+          </View>
+        ) : null}
       </Card>
 
       {errorMessage ? (
@@ -263,15 +295,29 @@ export function WordForm({
 
 type FormTextFieldProps = TextInputProps & {
   label: string;
+  required?: boolean;
 };
 
-function FormTextField({ label, multiline = false, style, ...props }: FormTextFieldProps) {
+function FormTextField({
+  label,
+  multiline = false,
+  required = false,
+  style,
+  ...props
+}: FormTextFieldProps) {
   const styles = useStyles();
   const { theme } = useAppTheme();
 
   return (
     <View style={styles.field}>
-      <AppText variant="label">{label}</AppText>
+      <View style={styles.fieldLabelRow}>
+        <AppText variant="label">{label}</AppText>
+        {required ? (
+          <AppText style={styles.requiredLabel} variant="caption">
+            Required
+          </AppText>
+        ) : null}
+      </View>
       <TextInput
         multiline={multiline}
         placeholderTextColor={theme.colors.content.tertiary}
@@ -280,6 +326,20 @@ function FormTextField({ label, multiline = false, style, ...props }: FormTextFi
         {...props}
       />
     </View>
+  );
+}
+
+function hasAdvancedDetails(values: WordFormValues): boolean {
+  return Boolean(
+    values.pronunciation.trim() ||
+      values.simpleDefinition.trim() ||
+      values.partOfSpeech.trim() ||
+      values.examples.trim() ||
+      values.synonyms.trim() ||
+      values.antonyms.trim() ||
+      values.sourceSentence.trim() ||
+      values.personalNotes.trim() ||
+      values.isFavorite,
   );
 }
 
@@ -330,11 +390,23 @@ const useStyles = createThemedStyles((theme) => ({
   sectionHeadingCopy: {
     gap: theme.spacing.xxs,
   },
+  sectionDivider: {
+    backgroundColor: theme.colors.border.subtle,
+    height: 1,
+  },
   manageLink: {
     color: theme.colors.brand.primary,
   },
   field: {
     gap: theme.spacing.xs,
+  },
+  fieldLabelRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  requiredLabel: {
+    color: theme.colors.content.tertiary,
   },
   input: {
     backgroundColor: theme.colors.background.muted,
@@ -394,6 +466,23 @@ const useStyles = createThemedStyles((theme) => ({
   favoriteCopy: {
     flex: 1,
     gap: theme.spacing.xxs,
+  },
+  moreDetailsButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: 48,
+  },
+  moreDetailsCopy: {
+    flex: 1,
+    gap: theme.spacing.xxs,
+    paddingRight: theme.spacing.md,
+  },
+  advancedFields: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
+    gap: theme.spacing.md,
+    paddingTop: theme.spacing.md,
   },
   errorText: {
     color: theme.colors.semantic.error.foreground,

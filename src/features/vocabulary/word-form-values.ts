@@ -34,6 +34,18 @@ export const EMPTY_WORD_FORM_VALUES: WordFormValues = {
   word: '',
 };
 
+export function getWordFormValidationError(values: WordFormValues): string | null {
+  if (!values.word.normalize('NFKC').trim()) {
+    return 'Enter the word you want to save.';
+  }
+
+  if (!values.definition.normalize('NFKC').trim()) {
+    return 'Add a meaning for this word.';
+  }
+
+  return null;
+}
+
 function splitList(value: string, separator: RegExp): string[] {
   return value
     .split(separator)

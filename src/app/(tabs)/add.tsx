@@ -27,16 +27,11 @@ export default function AddScreen() {
           showsVerticalScrollIndicator={false}
         >
           <PageHeader
-            description="Only the word is required. Add as much context as you want."
+            description="Save the word and its meaning now. Add extra details only when they help."
             eyebrow="Quick capture"
             title="Add a word"
           />
-          <WordForm
-            onSubmit={saveWord}
-            quickSubmitLabel="Quick save word"
-            resetOnSuccess
-            submitLabel="Save to my vault"
-          />
+          <WordForm onSubmit={saveWord} resetOnSuccess submitLabel="Save word" />
         </ScrollView>
       </KeyboardAvoidingView>
     </Screen>

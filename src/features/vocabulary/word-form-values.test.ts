@@ -1,8 +1,30 @@
 import type { VocabularyWord } from '@/domain/vocabulary';
 
-import { toWordInput, valuesFromWord, type WordFormValues } from './word-form-values';
+import {
+  EMPTY_WORD_FORM_VALUES,
+  getWordFormValidationError,
+  toWordInput,
+  valuesFromWord,
+  type WordFormValues,
+} from './word-form-values';
 
 describe('word form values', () => {
+  it('requires only a word and meaning', () => {
+    expect(getWordFormValidationError(EMPTY_WORD_FORM_VALUES)).toBe(
+      'Enter the word you want to save.',
+    );
+    expect(
+      getWordFormValidationError({ ...EMPTY_WORD_FORM_VALUES, word: 'Ephemeral' }),
+    ).toBe('Add a meaning for this word.');
+    expect(
+      getWordFormValidationError({
+        ...EMPTY_WORD_FORM_VALUES,
+        definition: 'Lasting for a short time.',
+        word: 'Ephemeral',
+      }),
+    ).toBeNull();
+  });
+
   it('converts free-form lists without breaking commas inside examples', () => {
     const values: WordFormValues = {
       antonyms: 'lasting; permanent\n enduring ',

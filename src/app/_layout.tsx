@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LocalDataProvider, useLocalData } from '@/data';
+import { AiAssistProvider } from '@/features/ai';
 import { ReviewProvider } from '@/features/review';
 import { VocabularyProvider } from '@/features/vocabulary';
 import { AppThemeProvider, useAppTheme } from '@/theme';
@@ -28,11 +29,13 @@ function ThemedApplication() {
 
   return (
     <AppThemeProvider initialMode={settings.themeMode} onModeChange={setThemeMode}>
-      <VocabularyProvider>
-        <ReviewProvider>
-          <RootNavigator />
-        </ReviewProvider>
-      </VocabularyProvider>
+      <AiAssistProvider>
+        <VocabularyProvider>
+          <ReviewProvider>
+            <RootNavigator />
+          </ReviewProvider>
+        </VocabularyProvider>
+      </AiAssistProvider>
     </AppThemeProvider>
   );
 }
