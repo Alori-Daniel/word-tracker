@@ -41,4 +41,23 @@ describe('SettingsRepository', () => {
       }),
     );
   });
+
+  it('persists completion of guest onboarding', async () => {
+    const runAsync = jest.fn(async () => ({ changes: 1, lastInsertRowId: 1 }));
+    const database = { runAsync } as unknown as SQLiteDatabase;
+    const repository = new SettingsRepository(database, {
+      createId: () => 'unused',
+      now: () => '2026-09-25T00:00:00.000Z',
+    });
+
+    await repository.setOnboardingCompleted(true);
+
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('ON CONFLICT(setting_key)'),
+      expect.objectContaining({
+        $key: 'onboarding_completed',
+        $valueJson: 'true',
+      }),
+    );
+  });
 });

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, type PressableProps, View } from 'react-native';
 
 import { createThemedStyles, useAppTheme } from '@/theme';
@@ -6,6 +7,7 @@ import { AppText } from './app-text';
 
 type AppButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   label: string;
+  leftAccessory?: ReactNode;
   loading?: boolean;
   variant?: 'primary' | 'secondary' | 'ghost';
 };
@@ -13,6 +15,7 @@ type AppButtonProps = Omit<PressableProps, 'children' | 'style'> & {
 export function AppButton({
   disabled,
   label,
+  leftAccessory,
   loading = false,
   variant = 'primary',
   ...props
@@ -41,9 +44,12 @@ export function AppButton({
             color={isPrimary ? theme.colors.brand.onPrimary : theme.colors.brand.primary}
           />
         ) : (
-          <AppText style={isPrimary && styles.primaryLabel} variant="label">
-            {label}
-          </AppText>
+          <>
+            {leftAccessory}
+            <AppText style={isPrimary && styles.primaryLabel} variant="label">
+              {label}
+            </AppText>
+          </>
         )}
       </View>
     </Pressable>
@@ -60,6 +66,7 @@ const useStyles = createThemedStyles((theme) => ({
   content: {
     alignItems: 'center',
     flexDirection: 'row',
+    gap: theme.spacing.sm,
     justifyContent: 'center',
     minHeight: 24,
   },

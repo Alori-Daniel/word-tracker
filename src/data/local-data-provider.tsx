@@ -2,6 +2,7 @@ import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
 import {
   createContext,
   type PropsWithChildren,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,7 +10,7 @@ import {
 } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 
-import type { LocalSettings } from '@/domain/settings';
+import type { LocalSettings, ThemeMode } from '@/domain/settings';
 import type { GuestIdentity } from '@/domain/vocabulary';
 import { darkColors, lightColors } from '@/theme/colors';
 
@@ -29,12 +30,19 @@ type LocalDataContextValue = {
   databaseVersion: number;
   categoryCount: number;
   wordCount: number;
+  setOnboardingCompleted: (completed: boolean) => Promise<void>;
+  setThemeMode: (mode: ThemeMode) => Promise<void>;
 };
+
+type LocalDataSnapshot = Omit<
+  LocalDataContextValue,
+  'setOnboardingCompleted' | 'setThemeMode'
+>;
 
 type BootstrapState =
   | { status: 'loading' }
   | { status: 'error'; error: Error }
-  | { status: 'ready'; value: LocalDataContextValue };
+  | { status: 'ready'; value: LocalDataSnapshot };
 
 const LocalDataContext = createContext<LocalDataContextValue | null>(null);
 
@@ -120,6 +128,58 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
     };
   }, [attempt, database]);
 
+  const setOnboardingCompleted = useCallback(
+    async (completed: boolean) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      await state.value.repositories.settings.setOnboardingCompleted(completed);
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                settings: { ...current.value.settings, onboardingCompleted: completed },
+              },
+            }
+          : current,
+      );
+    },
+    [state],
+  );
+
+  const setThemeMode = useCallback(
+    async (mode: ThemeMode) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      await state.value.repositories.settings.setThemeMode(mode);
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                settings: { ...current.value.settings, themeMode: mode },
+              },
+            }
+          : current,
+      );
+    },
+    [state],
+  );
+
+  const contextValue = useMemo<LocalDataContextValue | null>(
+    () =>
+      state.status === 'ready'
+        ? { ...state.value, setOnboardingCompleted, setThemeMode }
+        : null,
+    [setOnboardingCompleted, setThemeMode, state],
+  );
+
   if (state.status === 'loading') {
     return <InitializationState />;
   }
@@ -128,7 +188,7 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
     return <InitializationState error={state.error} onRetry={() => setAttempt((value) => value + 1)} />;
   }
 
-  return <LocalDataContext.Provider value={state.value}>{children}</LocalDataContext.Provider>;
+  return <LocalDataContext.Provider value={contextValue}>{children}</LocalDataContext.Provider>;
 }
 
 function InitializationState({ error, onRetry }: { error?: Error; onRetry?: () => void }) {
