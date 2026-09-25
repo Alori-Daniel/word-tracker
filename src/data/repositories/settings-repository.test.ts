@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { DEFAULT_WIDGET_PREFERENCES } from '@/domain/widget';
+
 import { SettingsRepository } from './settings-repository';
 
 describe('SettingsRepository', () => {
@@ -20,6 +22,7 @@ describe('SettingsRepository', () => {
       themeMode: 'dark',
       onboardingCompleted: false,
       reviewRemindersEnabled: true,
+      widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
     });
   });
 
@@ -57,6 +60,31 @@ describe('SettingsRepository', () => {
       expect.objectContaining({
         $key: 'onboarding_completed',
         $valueJson: 'true',
+      }),
+    );
+  });
+
+  it('persists widget preferences as one validated setting', async () => {
+    const runAsync = jest.fn(async () => ({ changes: 1, lastInsertRowId: 1 }));
+    const database = { runAsync } as unknown as SQLiteDatabase;
+    const repository = new SettingsRepository(database, {
+      createId: () => 'unused',
+      now: () => '2026-09-25T00:00:00.000Z',
+    });
+    const preferences = {
+      categoryId: 'category-1',
+      contentSource: 'favorites',
+      rotationMinutes: 180,
+      themeMode: 'dark',
+    } as const;
+
+    await repository.setWidgetPreferences(preferences);
+
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('ON CONFLICT(setting_key)'),
+      expect.objectContaining({
+        $key: 'widget_preferences',
+        $valueJson: JSON.stringify(preferences),
       }),
     );
   });

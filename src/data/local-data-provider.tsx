@@ -13,6 +13,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, useColorScheme, View } 
 import type { LinkAccountInput } from '@/domain/account';
 import type { LocalSettings, ThemeMode } from '@/domain/settings';
 import type { GuestIdentity } from '@/domain/vocabulary';
+import type { WidgetPreferences } from '@/domain/widget';
 import { darkColors, lightColors } from '@/theme/colors';
 
 import { DATABASE_NAME } from './database/constants';
@@ -36,11 +37,16 @@ type LocalDataContextValue = {
   wordCount: number;
   setOnboardingCompleted: (completed: boolean) => Promise<void>;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
+  setWidgetPreferences: (preferences: WidgetPreferences) => Promise<void>;
 };
 
 type LocalDataSnapshot = Omit<
   LocalDataContextValue,
-  'linkAccount' | 'notifyCloudDataChanged' | 'setOnboardingCompleted' | 'setThemeMode'
+  | 'linkAccount'
+  | 'notifyCloudDataChanged'
+  | 'setOnboardingCompleted'
+  | 'setThemeMode'
+  | 'setWidgetPreferences'
 >;
 
 type BootstrapState =
@@ -177,6 +183,28 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
     [state],
   );
 
+  const setWidgetPreferences = useCallback(
+    async (preferences: WidgetPreferences) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      await state.value.repositories.settings.setWidgetPreferences(preferences);
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                settings: { ...current.value.settings, widgetPreferences: preferences },
+              },
+            }
+          : current,
+      );
+    },
+    [state],
+  );
+
   const linkAccount = useCallback(
     async (account: LinkAccountInput) => {
       if (state.status !== 'ready') {
@@ -227,9 +255,17 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
             notifyCloudDataChanged,
             setOnboardingCompleted,
             setThemeMode,
+            setWidgetPreferences,
           }
         : null,
-    [linkAccount, notifyCloudDataChanged, setOnboardingCompleted, setThemeMode, state],
+    [
+      linkAccount,
+      notifyCloudDataChanged,
+      setOnboardingCompleted,
+      setThemeMode,
+      setWidgetPreferences,
+      state,
+    ],
   );
 
   if (state.status === 'loading') {

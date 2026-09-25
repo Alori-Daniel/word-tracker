@@ -1,6 +1,6 @@
 # Vocabulary Vault account and cloud setup
 
-Stage 7 adds optional Google sign-in and cloud backup without changing the guest-first product philosophy. The app is still fully usable without an account. When a guest chooses Google sign-in, their existing local categories, words, attribution, and review history are attached to the account and merged into its cloud vault.
+The account and cloud foundation adds optional Google sign-in and cloud backup without changing the guest-first product philosophy. The app is still fully usable without an account. When a guest chooses Google sign-in, their existing local categories, words, attribution, and review history are attached to the account and merged into its cloud vault.
 
 ```text
 Local guest vault

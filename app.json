@@ -8,9 +8,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.danori.wordecho",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.danori.wordecho",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -42,6 +44,46 @@
         "expo-web-browser",
         {
           "experimentalLauncherActivity": false
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.danori.wordecho.widgets",
+          "groupIdentifier": "group.com.danori.wordecho",
+          "widgets": [
+            {
+              "name": "VocabularyVaultWidget",
+              "displayName": "Vocabulary Vault",
+              "description": "Resurface and act on words from your vocabulary vault.",
+              "supportedFamilies": [
+                "systemSmall",
+                "systemMedium",
+                "systemLarge"
+              ],
+              "contentMarginsDisabled": true
+            }
+          ]
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "VocabularyVaultWidget",
+              "label": "Vocabulary Vault",
+              "description": "Resurface and act on words from your vocabulary vault.",
+              "minWidth": "110dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 3,
+              "maxResizeWidth": "360dp",
+              "maxResizeHeight": "360dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
         }
       ]
     ]

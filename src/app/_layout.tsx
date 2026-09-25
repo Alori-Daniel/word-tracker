@@ -8,6 +8,7 @@ import { AccountProvider, useAccount } from '@/features/auth';
 import { DictionaryLookupProvider } from '@/features/dictionary';
 import { ReviewProvider } from '@/features/review';
 import { VocabularyProvider } from '@/features/vocabulary';
+import { WidgetSyncProvider } from '@/features/widgets';
 import { AppThemeProvider, useAppTheme } from '@/theme';
 
 function RootNavigator() {
@@ -35,9 +36,11 @@ function ThemedApplication() {
       <DictionaryLookupProvider>
         <AiAssistProvider getAccessToken={getAccessToken}>
           <VocabularyProvider>
-            <ReviewProvider>
-              <RootNavigator />
-            </ReviewProvider>
+            <WidgetSyncProvider>
+              <ReviewProvider>
+                <RootNavigator />
+              </ReviewProvider>
+            </WidgetSyncProvider>
           </VocabularyProvider>
         </AiAssistProvider>
       </DictionaryLookupProvider>

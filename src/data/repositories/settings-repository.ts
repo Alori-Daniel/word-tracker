@@ -6,6 +6,7 @@ import {
   type LocalSettings,
   type ThemeMode,
 } from '@/domain/settings';
+import { parseWidgetPreferences, type WidgetPreferences } from '@/domain/widget';
 
 import type { SettingRow } from '../database/rows';
 import type { RepositoryDependencies } from './repository-dependencies';
@@ -14,6 +15,7 @@ const SETTING_KEYS = {
   themeMode: 'theme_mode',
   onboardingCompleted: 'onboarding_completed',
   reviewRemindersEnabled: 'review_reminders_enabled',
+  widgetPreferences: 'widget_preferences',
 } as const;
 
 function safelyParse(value: string): unknown {
@@ -38,6 +40,7 @@ export class SettingsRepository {
     const themeMode = values.get(SETTING_KEYS.themeMode);
     const onboardingCompleted = values.get(SETTING_KEYS.onboardingCompleted);
     const reviewRemindersEnabled = values.get(SETTING_KEYS.reviewRemindersEnabled);
+    const widgetPreferences = values.get(SETTING_KEYS.widgetPreferences);
 
     return {
       themeMode: isThemeMode(themeMode) ? themeMode : DEFAULT_LOCAL_SETTINGS.themeMode,
@@ -49,6 +52,7 @@ export class SettingsRepository {
         typeof reviewRemindersEnabled === 'boolean'
           ? reviewRemindersEnabled
           : DEFAULT_LOCAL_SETTINGS.reviewRemindersEnabled,
+      widgetPreferences: parseWidgetPreferences(widgetPreferences),
     };
   }
 
@@ -62,6 +66,10 @@ export class SettingsRepository {
 
   setReviewRemindersEnabled(enabled: boolean): Promise<void> {
     return this.setValue(SETTING_KEYS.reviewRemindersEnabled, enabled);
+  }
+
+  setWidgetPreferences(preferences: WidgetPreferences): Promise<void> {
+    return this.setValue(SETTING_KEYS.widgetPreferences, preferences);
   }
 
   private async setValue(key: string, value: unknown): Promise<void> {

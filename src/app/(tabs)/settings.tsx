@@ -14,6 +14,7 @@ import {
 import { useLocalData } from '@/data';
 import { GoogleSignInButton, useAccount } from '@/features/auth';
 import { useVocabulary } from '@/features/vocabulary';
+import { WidgetSettingsCard } from '@/features/widgets';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 const ACCOUNT_BENEFITS = [
@@ -173,6 +174,11 @@ export default function SettingsScreen() {
             </View>
             <ThemeModeSelector />
           </Card>
+        </View>
+
+        <View style={styles.section}>
+          <AppText variant="subtitle">Home Screen widget</AppText>
+          <WidgetSettingsCard />
         </View>
 
         <View style={styles.section}>
