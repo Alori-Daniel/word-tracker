@@ -143,6 +143,21 @@ const createInitialSchema: DatabaseMigration = {
   `,
 };
 
-export const databaseMigrations = [createInitialSchema] as const satisfies readonly DatabaseMigration[];
+const addDefinitionAttribution: DatabaseMigration = {
+  version: 2,
+  name: 'add_definition_attribution',
+  sql: `
+    ALTER TABLE words ADD COLUMN definition_provider_name TEXT;
+    ALTER TABLE words ADD COLUMN definition_provider_url TEXT;
+    ALTER TABLE words ADD COLUMN definition_source_url TEXT;
+    ALTER TABLE words ADD COLUMN definition_license_name TEXT;
+    ALTER TABLE words ADD COLUMN definition_license_url TEXT;
+  `,
+};
+
+export const databaseMigrations = [
+  createInitialSchema,
+  addDefinitionAttribution,
+] as const satisfies readonly DatabaseMigration[];
 
 export const DATABASE_VERSION = databaseMigrations[databaseMigrations.length - 1]?.version ?? 0;

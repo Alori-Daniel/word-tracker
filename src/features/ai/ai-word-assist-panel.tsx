@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { AppButton, AppText } from '@/components/ui';
-import type { AiWordSuggestion } from '@/domain/ai';
+import type { AiDictionaryGrounding, AiWordSuggestion } from '@/domain/ai';
 import { AiGatewayError } from '@/services/ai';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
@@ -11,6 +11,7 @@ import { useAiAssist } from './ai-assist-provider';
 
 type AiWordAssistPanelProps = {
   context: string;
+  dictionaryGrounding: AiDictionaryGrounding | null;
   existingDefinition: string;
   onApply: (suggestion: AiWordSuggestion) => void;
   word: string;
@@ -18,6 +19,7 @@ type AiWordAssistPanelProps = {
 
 export function AiWordAssistPanel({
   context,
+  dictionaryGrounding,
   existingDefinition,
   onApply,
   word,
@@ -45,6 +47,7 @@ export function AiWordAssistPanel({
       const result = await generateWordSuggestion({
         word,
         context,
+        dictionaryGrounding,
         existingDefinition,
       });
       setSuggestion(result.suggestion);
@@ -86,7 +89,9 @@ export function AiWordAssistPanel({
             </View>
           </View>
           <AppText tone="secondary" variant="caption">
-            Draft the meaning and optional dictionary-style details.
+            {dictionaryGrounding
+              ? 'Personalize the selected meaning and draft optional learning details.'
+              : 'Draft the meaning and optional dictionary-style details.'}
           </AppText>
         </View>
       </View>
@@ -99,7 +104,7 @@ export function AiWordAssistPanel({
 
       <AppButton
         disabled={!isConfigured}
-        label="Prefill word details"
+        label={dictionaryGrounding ? 'Personalize with AI' : 'Prefill word details'}
         leftAccessory={
           <MaterialIcons
             color={theme.colors.brand.primary}

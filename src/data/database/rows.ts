@@ -28,6 +28,11 @@ export type WordRow = {
   normalized_word: string;
   pronunciation: string | null;
   definition: string;
+  definition_provider_name: string | null;
+  definition_provider_url: string | null;
+  definition_source_url: string | null;
+  definition_license_name: string | null;
+  definition_license_url: string | null;
   simple_definition: string | null;
   part_of_speech: string | null;
   examples_json: string;

@@ -1,8 +1,16 @@
 export const AI_GATEWAY_API_VERSION = 1 as const;
 
+export type AiDictionaryGrounding = {
+  definition: string;
+  partOfSpeech: string | null;
+  example: string | null;
+  sourceName: string;
+};
+
 export type AiWordAssistRequest = {
   word: string;
   context?: string | null;
+  dictionaryGrounding?: AiDictionaryGrounding | null;
   existingDefinition?: string | null;
   locale?: string;
 };

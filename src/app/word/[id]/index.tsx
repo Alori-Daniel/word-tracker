@@ -181,6 +181,14 @@ export default function WordDetailScreen() {
 
           <DetailSection title="Definition">
             <AppText>{word.definition || 'No definition added yet.'}</AppText>
+            {word.definitionAttribution ? (
+              <AppText tone="tertiary" variant="caption">
+                Definition from {word.definitionAttribution.providerName}
+                {word.definitionAttribution.licenseName
+                  ? ` · ${word.definitionAttribution.licenseName}`
+                  : ''}
+              </AppText>
+            ) : null}
             {word.simpleDefinition ? (
               <View style={styles.simpleDefinition}>
                 <AppText tone="tertiary" variant="caption">

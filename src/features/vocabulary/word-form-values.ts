@@ -1,9 +1,11 @@
+import type { DictionaryAttribution } from '@/domain/dictionary';
 import type { CreateWordInput, LearningStatus, VocabularyWord } from '@/domain/vocabulary';
 
 export type WordFormValues = {
   antonyms: string;
   categoryId: string | null;
   definition: string;
+  definitionAttribution: DictionaryAttribution | null;
   examples: string;
   isFavorite: boolean;
   partOfSpeech: string;
@@ -21,6 +23,7 @@ export const EMPTY_WORD_FORM_VALUES: WordFormValues = {
   antonyms: '',
   categoryId: null,
   definition: '',
+  definitionAttribution: null,
   examples: '',
   isFavorite: false,
   partOfSpeech: '',
@@ -58,6 +61,7 @@ export function toWordInput(values: WordFormValues): CreateWordInput {
     word: values.word,
     pronunciation: values.pronunciation,
     definition: values.definition,
+    definitionAttribution: values.definitionAttribution,
     simpleDefinition: values.simpleDefinition,
     partOfSpeech: values.partOfSpeech,
     examples: splitList(values.examples, /\n+/),
@@ -77,6 +81,7 @@ export function valuesFromWord(word: VocabularyWord): WordFormValues {
     antonyms: word.antonyms.join(', '),
     categoryId: word.categoryId,
     definition: word.definition,
+    definitionAttribution: word.definitionAttribution,
     examples: word.examples.join('\n'),
     isFavorite: word.isFavorite,
     partOfSpeech: word.partOfSpeech ?? '',

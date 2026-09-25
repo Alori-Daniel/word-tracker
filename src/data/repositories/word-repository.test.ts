@@ -21,6 +21,11 @@ const wordRow: WordRow = {
   normalized_word: 'ephemeral',
   pronunciation: null,
   definition: 'Lasting a short time.',
+  definition_provider_name: null,
+  definition_provider_url: null,
+  definition_source_url: null,
+  definition_license_name: null,
+  definition_license_url: null,
   simple_definition: 'Brief.',
   part_of_speech: 'adjective',
   examples_json: '["A brief moment."]',
@@ -57,6 +62,13 @@ describe('WordRepository', () => {
       repository.create({
         word: '  Ephemeral  ',
         definition: '  Lasting a short time.  ',
+        definitionAttribution: {
+          providerName: 'Free Dictionary API',
+          providerUrl: 'https://dictionaryapi.dev/',
+          sourceUrl: null,
+          licenseName: null,
+          licenseUrl: null,
+        },
         synonyms: [' fleeting ', 'Fleeting'],
       }),
     ).resolves.toEqual(expect.objectContaining({ id: 'word-1', word: 'Ephemeral' }));
@@ -66,6 +78,8 @@ describe('WordRepository', () => {
       expect.objectContaining({
         $localUserId: 'guest-1',
         $normalizedWord: 'ephemeral',
+        $definitionProviderName: 'Free Dictionary API',
+        $definitionProviderUrl: 'https://dictionaryapi.dev/',
         $synonymsJson: '["fleeting"]',
         $word: 'Ephemeral',
       }),

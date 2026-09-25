@@ -24,6 +24,7 @@ export function applyAiSuggestionToWordForm(
     ...current,
     pronunciation: suggestion.pronunciation ?? current.pronunciation,
     definition: suggestion.definition,
+    definitionAttribution: null,
     simpleDefinition: suggestion.simpleDefinition,
     partOfSpeech: suggestion.partOfSpeech ?? current.partOfSpeech,
     examples: suggestion.examples.join('\n'),

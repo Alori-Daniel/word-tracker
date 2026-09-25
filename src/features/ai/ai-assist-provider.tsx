@@ -7,6 +7,7 @@ import {
 
 import type { AiWordAssistRequest, AiWordAssistResult } from '@/domain/ai';
 import { AiGatewayClient } from '@/services/ai';
+import { configuredGatewayUrl } from '@/services/gateway';
 
 type AiAssistContextValue = {
   generateWordSuggestion: (input: AiWordAssistRequest) => Promise<AiWordAssistResult>;
@@ -19,8 +20,6 @@ type AiAssistProviderProps = PropsWithChildren<{
 }>;
 
 const AiAssistContext = createContext<AiAssistContextValue | null>(null);
-const configuredGatewayUrl = process.env.EXPO_PUBLIC_AI_GATEWAY_URL;
-
 export function AiAssistProvider({
   baseUrl = configuredGatewayUrl,
   children,

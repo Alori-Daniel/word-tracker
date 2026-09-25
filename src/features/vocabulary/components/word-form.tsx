@@ -12,8 +12,14 @@ import {
 
 import { AppButton, AppText, Card } from '@/components/ui';
 import { DuplicateWordError } from '@/data';
+import type { AiDictionaryGrounding } from '@/domain/ai';
 import { LEARNING_STATUSES, type CreateWordInput } from '@/domain/vocabulary';
 import { AiWordAssistPanel, applyAiSuggestionToWordForm } from '@/features/ai';
+import {
+  applyDictionarySenseToWordForm,
+  DictionaryLookupPanel,
+  toAiDictionaryGrounding,
+} from '@/features/dictionary';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 import { useVocabulary } from '../vocabulary-provider';
@@ -43,6 +49,8 @@ export function WordForm({
   const [values, setValues] = useState(initialValues);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [dictionaryGrounding, setDictionaryGrounding] =
+    useState<AiDictionaryGrounding | null>(null);
   const [showMoreDetails, setShowMoreDetails] = useState(() => hasAdvancedDetails(initialValues));
 
   function updateValue<Key extends keyof WordFormValues>(key: Key, value: WordFormValues[Key]) {
@@ -65,6 +73,7 @@ export function WordForm({
 
       if (resetOnSuccess) {
         setValues(EMPTY_WORD_FORM_VALUES);
+        setDictionaryGrounding(null);
       }
     } catch (error) {
       setErrorMessage(
@@ -92,21 +101,52 @@ export function WordForm({
           autoFocus={!initialValues.word}
           label="Word"
           maxLength={120}
-          onChangeText={(value) => updateValue('word', value)}
+          onChangeText={(value) => {
+            setValues((current) => ({
+              ...current,
+              word: value,
+              definitionAttribution: null,
+            }));
+            setDictionaryGrounding(null);
+          }}
           placeholder="e.g. ephemeral"
           required
           value={values.word}
         />
+        <DictionaryLookupPanel
+          key={values.word}
+          onSelect={(selection) => {
+            setValues((current) => applyDictionarySenseToWordForm(current, selection));
+            setDictionaryGrounding(toAiDictionaryGrounding(selection));
+          }}
+          word={values.word}
+        />
         <FormTextField
           label="Meaning"
           multiline
-          onChangeText={(value) => updateValue('definition', value)}
+          onChangeText={(value) => {
+            setValues((current) => ({
+              ...current,
+              definition: value,
+              definitionAttribution: null,
+            }));
+            setDictionaryGrounding(null);
+          }}
           placeholder="What does this word mean?"
           required
           value={values.definition}
         />
+        {values.definitionAttribution ? (
+          <AppText tone="tertiary" variant="caption">
+            Definition from {values.definitionAttribution.providerName}
+            {values.definitionAttribution.licenseName
+              ? ` · ${values.definitionAttribution.licenseName}`
+              : ''}
+          </AppText>
+        ) : null}
         <AiWordAssistPanel
           context={values.sourceSentence}
+          dictionaryGrounding={dictionaryGrounding}
           existingDefinition={values.definition}
           key={values.word}
           onApply={(suggestion) =>

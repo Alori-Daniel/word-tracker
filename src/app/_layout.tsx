@@ -4,6 +4,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LocalDataProvider, useLocalData } from '@/data';
 import { AiAssistProvider } from '@/features/ai';
+import { DictionaryLookupProvider } from '@/features/dictionary';
 import { ReviewProvider } from '@/features/review';
 import { VocabularyProvider } from '@/features/vocabulary';
 import { AppThemeProvider, useAppTheme } from '@/theme';
@@ -29,13 +30,15 @@ function ThemedApplication() {
 
   return (
     <AppThemeProvider initialMode={settings.themeMode} onModeChange={setThemeMode}>
-      <AiAssistProvider>
-        <VocabularyProvider>
-          <ReviewProvider>
-            <RootNavigator />
-          </ReviewProvider>
-        </VocabularyProvider>
-      </AiAssistProvider>
+      <DictionaryLookupProvider>
+        <AiAssistProvider>
+          <VocabularyProvider>
+            <ReviewProvider>
+              <RootNavigator />
+            </ReviewProvider>
+          </VocabularyProvider>
+        </AiAssistProvider>
+      </DictionaryLookupProvider>
     </AppThemeProvider>
   );
 }

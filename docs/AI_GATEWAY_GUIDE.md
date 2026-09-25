@@ -1,38 +1,35 @@
-# Vocabulary Vault AI gateway guide
+# Vocabulary Vault dictionary and AI gateway guide
 
-This document explains the Stage 6 AI architecture in plain language. The short version is: **the mobile app talks to our gateway, and only the gateway talks to OpenAI**.
+This document explains the Stage 6 lookup and AI architecture in plain language. The short version is: **the mobile app talks to our gateway; the gateway talks to dictionary and AI providers**.
 
 ```text
 Vocabulary Vault app
         |
-        | word + optional context + account token
         v
-Vocabulary Vault AI gateway
-  - verifies the user
-  - checks premium access
-  - checks the usage limit
-  - holds the secret OpenAI key
-        |
-        | secure server-to-server request
-        v
-OpenAI Responses API
-        |
-        | structured vocabulary draft
-        v
+Vocabulary Vault gateway
+  |                         |
+  | free dictionary lookup  | premium AI assistance
+  | anonymous + rate limit  | account + plan + quota checks
+  v                         v
+Dictionary provider         OpenAI Responses API
+  |                         |
+  +----------+--------------+
+             v
 Gateway validates the result
-        |
-        v
-App previews it; the user decides whether to apply it
+             |
+             v
+App shows choices or a preview; the user decides what to apply
 ```
 
-## What is a gateway?
+## What is the gateway?
 
 A gateway is a small backend service that stands between the app and an external AI provider. Think of it as a secure receptionist:
 
-1. The app asks the gateway for help with a word.
-2. The gateway checks who is asking and whether their plan allows AI usage.
-3. The gateway calls OpenAI with its private API key.
-4. It validates the answer and returns only the fields the app understands.
+1. The app asks the gateway to look up a word or generate an AI draft.
+2. For a free lookup, the gateway applies anonymous rate limits and checks its cache.
+3. For AI, it checks who is asking and whether their plan and quota allow usage.
+4. The gateway calls the relevant provider and validates the response.
+5. The app receives only the fields it understands—never provider secrets.
 
 The gateway is necessary because an installed mobile app cannot keep a secret. Expo replaces every `EXPO_PUBLIC_*` value in the app bundle, so those values are visible to an end user. Expo explicitly warns not to put private keys there. The official OpenAI API reference also says API keys must not be exposed in client-side apps and should be loaded on a server. See the [Expo environment-variable guide](https://docs.expo.dev/guides/environment-variables/) and [OpenAI API authentication guidance](https://developers.openai.com/api/reference/overview#authentication).
 
@@ -40,15 +37,28 @@ The gateway is necessary because an installed mobile app cannot keep a secret. E
 
 | Part | Location | Responsibility |
 | --- | --- | --- |
-| Shared AI types | `src/domain/ai.ts` | Defines the request, generated vocabulary fields, metadata, and known error types. |
+| Shared dictionary types | `src/domain/dictionary.ts` | Defines lookup meanings, attribution, metadata, selections, and known error types. |
+| Mobile dictionary client | `src/services/dictionary/` | Calls the shared gateway, applies a timeout, maps safe errors, and rejects malformed responses. |
+| Dictionary form workflow | `src/features/dictionary/` | Shows possible meanings and only fills fields after the user explicitly selects one. |
+| Dictionary reference handler | `server/dictionary-gateway/` | Applies cache and anonymous rate-limit hooks, calls the replaceable provider, and normalizes its response. |
+| Shared AI types | `src/domain/ai.ts` | Defines the request, optional dictionary grounding, generated fields, metadata, and known errors. |
 | Mobile gateway client | `src/services/ai/` | Calls only our gateway, attaches a future account token, applies a timeout, maps safe errors, and rejects malformed responses. |
 | AI form workflow | `src/features/ai/` | Lets a user generate, preview, and explicitly apply suggestions. It never saves or overwrites fields automatically. |
 | Server reference handler | `server/ai-gateway/word-assist-handler.ts` | Enforces authentication and authorization hooks, calls the OpenAI Responses API, and validates the structured result. |
-| Configuration examples | `.env.example` and `server/ai-gateway/.env.example` | Clearly separate the public gateway URL from server-only secrets. |
+| Configuration examples | `.env.example` and `server/ai-gateway/.env.example` | Clearly separate the public shared gateway URL from server-only secrets. |
 
 The reference handler uses Structured Outputs through `text.format` so the model is asked to return the exact JSON shape Vocabulary Vault expects. The app and gateway still validate the result because network responses must always be treated as untrusted. This follows the current [OpenAI Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 ## What the user experiences
+
+The quick-add card keeps only **Word** and **Meaning** required. After entering a word, the user can choose between two helpers:
+
+- **Look up word — Free:** returns dictionary meanings. The user chooses the intended sense; the app never silently picks the first one. That choice can prefill meaning, pronunciation, part of speech, example, synonyms, and antonyms.
+- **Prefill with AI — Premium:** returns a learner-friendly draft for explicit review and application.
+
+When a dictionary sense has been selected, that exact definition and part of speech are sent to AI as a factual anchor. AI can simplify or personalize it, but the gateway prompt tells it not to switch to or contradict another meaning.
+
+Dictionary attribution is stored with the definition. It is deliberately separate from **Where did you find it?**, which remains the user's personal reading or conversation context. Manually rewriting the meaning or applying AI content clears the dictionary attribution so the app does not mislabel edited text as a verbatim provider definition.
 
 The add and edit word forms now contain an optional **Prefill with AI** area.
 
@@ -63,7 +73,7 @@ AI content is deliberately presented as a draft, with a reminder that it can be 
 
 ## What is connected now—and what is not
 
-The code boundary is implemented and testable, but no live AI provider is connected yet. A live connection requires infrastructure and credentials that should not be guessed or committed to this repository:
+The code boundaries are implemented and testable, but no live gateway is deployed from this repository. A live connection requires infrastructure and credentials that should not be guessed or committed here:
 
 - a deployed HTTPS gateway URL;
 - Google sign-in issuing an account token;
@@ -71,7 +81,7 @@ The code boundary is implemented and testable, but no live AI provider is connec
 - an OpenAI project API key stored in the gateway's secret manager;
 - a server-selected model that supports Structured Outputs.
 
-Until `EXPO_PUBLIC_AI_GATEWAY_URL` is configured, the app shows the AI control in a disabled state. After a gateway is configured but before account authentication is connected, the fail-closed handler returns “Sign in to use AI assistance.” This is intentional: premium AI must not become anonymous or unlimited by accident.
+Until `EXPO_PUBLIC_GATEWAY_URL` is configured, both helpers show a disabled state. Once deployed, free dictionary lookup is intentionally anonymous but must have cache and rate-limit implementations. AI remains fail-closed: before account authentication is connected, its handler returns “Sign in to use AI assistance.”
 
 ## Recommended production deployment
 
@@ -96,10 +106,10 @@ The handler is framework-independent and uses standard `Request`, `Response`, an
 Copy the root example file to `.env.local` and set only the gateway URL:
 
 ```dotenv
-EXPO_PUBLIC_AI_GATEWAY_URL=https://your-gateway.example.com
+EXPO_PUBLIC_GATEWAY_URL=https://your-gateway.example.com
 ```
 
-This value is public. Its only job is to tell the app where our server lives.
+This value is public. Its only job is to tell the app where our server lives. The older `EXPO_PUBLIC_AI_GATEWAY_URL` name is temporarily accepted for compatibility, but new environments should use the shared name.
 
 ### In the deployed gateway
 
@@ -119,7 +129,43 @@ These values must never appear in:
 
 The repository ignores real `.env` files and commits only blank/example configuration files.
 
-## API contract
+## Dictionary API contract
+
+The app sends `GET /v1/dictionary/lookup?word=ephemeral&locale=en`. The initial provider adapter uses [Free Dictionary API](https://dictionaryapi.dev/), but provider-specific fields never leak into the mobile contract, so the provider can be replaced later.
+
+The gateway returns one or more meanings and their attribution:
+
+```json
+{
+  "data": {
+    "word": "ephemeral",
+    "pronunciation": "/ɪˈfɛmərəl/",
+    "audioUrl": null,
+    "senses": [
+      {
+        "id": "0-0-0",
+        "definition": "Lasting for a very short time.",
+        "partOfSpeech": "adjective",
+        "example": "The rainbow was ephemeral.",
+        "synonyms": ["brief", "fleeting"],
+        "antonyms": ["lasting"]
+      }
+    ],
+    "attribution": {
+      "providerName": "Free Dictionary API",
+      "providerUrl": "https://dictionaryapi.dev/",
+      "sourceUrl": "https://en.wiktionary.org/wiki/ephemeral",
+      "licenseName": "CC BY-SA 3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+    }
+  },
+  "meta": { "requestId": "gateway-request-id", "cached": false }
+}
+```
+
+The dictionary handler requires two deployment hooks: `cache` and `checkRateLimit`. A production adapter should key anonymous limits by a privacy-preserving network/device strategy, apply a short burst limit, and use the included 24-hour cache TTL. Provider failures are converted into stable app errors.
+
+## AI API contract
 
 The app sends `POST /v1/word-assist` to the gateway:
 
@@ -128,6 +174,12 @@ The app sends `POST /v1/word-assist` to the gateway:
   "version": 1,
   "word": "ephemeral",
   "context": "The beauty of the sunset was ephemeral.",
+  "dictionaryGrounding": {
+    "definition": "Lasting for a very short time.",
+    "partOfSpeech": "adjective",
+    "example": "The rainbow was ephemeral.",
+    "sourceName": "Free Dictionary API"
+  },
   "existingDefinition": null,
   "locale": "en"
 }
@@ -190,6 +242,12 @@ Before enabling the feature for real users:
 
 ## Stage 6 review checklist
 
+- [ ] Word and Meaning remain the only required fields in the quick-add flow.
+- [ ] Dictionary lookup is clearly marked free and does not require sign-in.
+- [ ] No dictionary meaning is applied until the user explicitly selects it.
+- [ ] Definition attribution is visible and remains separate from personal source context.
+- [ ] Editing the meaning clears stale provider attribution.
+- [ ] A selected dictionary sense grounds subsequent AI assistance.
 - [ ] The AI area is placed appropriately in both add and edit flows.
 - [ ] Generated content is only applied after explicit user approval.
 - [ ] Existing category, favourite status, learning status, source, and source sentence are preserved.

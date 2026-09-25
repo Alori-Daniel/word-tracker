@@ -120,6 +120,16 @@ export function mapWordRow(row: WordRow): VocabularyWord {
     word: row.word,
     pronunciation: row.pronunciation,
     definition: row.definition,
+    definitionAttribution:
+      row.definition_provider_name && row.definition_provider_url
+        ? {
+            providerName: row.definition_provider_name,
+            providerUrl: row.definition_provider_url,
+            sourceUrl: row.definition_source_url,
+            licenseName: row.definition_license_name,
+            licenseUrl: row.definition_license_url,
+          }
+        : null,
     simpleDefinition: row.simple_definition,
     partOfSpeech: row.part_of_speech,
     examples: deserializeStringList(row.examples_json),

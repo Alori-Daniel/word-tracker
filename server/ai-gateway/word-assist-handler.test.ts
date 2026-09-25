@@ -57,7 +57,18 @@ describe('word assist gateway handler', () => {
     const deps = dependencies();
     const handler = createWordAssistHandler(deps);
     const response = await handler(
-      request({ version: 1, word: 'Ephemeral', context: null, existingDefinition: null }),
+      request({
+        version: 1,
+        word: 'Ephemeral',
+        context: null,
+        existingDefinition: null,
+        dictionaryGrounding: {
+          definition: 'Lasting for a very short time.',
+          partOfSpeech: 'adjective',
+          example: null,
+          sourceName: 'Free Dictionary API',
+        },
+      }),
     );
     const body = (await response.json()) as Record<string, unknown>;
 
@@ -74,6 +85,10 @@ describe('word assist gateway handler', () => {
         headers: expect.objectContaining({ Authorization: 'Bearer server-only-key' }),
       }),
     );
+    const fetchMock = deps.fetchImpl as jest.MockedFunction<typeof fetch>;
+    const [, providerOptions] = fetchMock.mock.calls[0];
+    expect(String(providerOptions?.body)).toContain('dictionaryGrounding');
+    expect(String(providerOptions?.body)).toContain('Free Dictionary API');
   });
 
   it('never calls OpenAI for an unauthenticated request', async () => {

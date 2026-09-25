@@ -4,6 +4,7 @@ import {
   type AiWordAssistRequest,
   type AiWordAssistResult,
 } from '@/domain/ai';
+import { normalizeGatewayBaseUrl } from '@/services/gateway';
 
 import { AiGatewayError } from './ai-gateway-error';
 import { parseAiGatewayResponse } from './ai-response-parser';
@@ -26,33 +27,6 @@ type GatewayErrorBody = {
 const DEFAULT_TIMEOUT_MS = 20_000;
 const REQUEST_PATH = 'v1/word-assist';
 
-function normalizeBaseUrl(baseUrl?: string | null): string | null {
-  const candidate = baseUrl?.trim();
-
-  if (!candidate) {
-    return null;
-  }
-
-  let parsed: URL;
-
-  try {
-    parsed = new URL(candidate);
-  } catch {
-    return null;
-  }
-
-  const isSecure = parsed.protocol === 'https:';
-  const isLoopback =
-    parsed.protocol === 'http:' &&
-    ['localhost', '127.0.0.1', '[::1]', '10.0.2.2'].includes(parsed.hostname);
-
-  if (!isSecure && !isLoopback) {
-    return null;
-  }
-
-  return `${parsed.origin}${parsed.pathname.replace(/\/+$/, '')}`;
-}
-
 function normalizeRequest(input: AiWordAssistRequest) {
   const word = input.word.normalize('NFKC').trim();
 
@@ -66,6 +40,15 @@ function normalizeRequest(input: AiWordAssistRequest) {
   const context = input.context?.normalize('NFKC').trim() || null;
   const existingDefinition = input.existingDefinition?.normalize('NFKC').trim() || null;
   const locale = input.locale?.trim() || 'en';
+  const dictionaryGrounding = input.dictionaryGrounding
+    ? {
+        definition: input.dictionaryGrounding.definition.normalize('NFKC').trim(),
+        partOfSpeech:
+          input.dictionaryGrounding.partOfSpeech?.normalize('NFKC').trim() || null,
+        example: input.dictionaryGrounding.example?.normalize('NFKC').trim() || null,
+        sourceName: input.dictionaryGrounding.sourceName.normalize('NFKC').trim(),
+      }
+    : null;
 
   if (context && context.length > 2_000) {
     throw new AiGatewayError('invalid_request', 'The source context is too long for AI assistance.');
@@ -78,10 +61,23 @@ function normalizeRequest(input: AiWordAssistRequest) {
     );
   }
 
+  if (
+    dictionaryGrounding &&
+    (!dictionaryGrounding.definition ||
+      dictionaryGrounding.definition.length > 3_000 ||
+      (dictionaryGrounding.partOfSpeech?.length ?? 0) > 80 ||
+      (dictionaryGrounding.example?.length ?? 0) > 700 ||
+      !dictionaryGrounding.sourceName ||
+      dictionaryGrounding.sourceName.length > 120)
+  ) {
+    throw new AiGatewayError('invalid_request', 'The selected dictionary meaning is invalid.');
+  }
+
   return {
     version: AI_GATEWAY_API_VERSION,
     word,
     context,
+    dictionaryGrounding,
     existingDefinition,
     locale,
   };
@@ -150,7 +146,7 @@ export class AiGatewayClient {
     getAccessToken,
     timeoutMs = DEFAULT_TIMEOUT_MS,
   }: AiGatewayClientOptions) {
-    this.baseUrl = normalizeBaseUrl(baseUrl);
+    this.baseUrl = normalizeGatewayBaseUrl(baseUrl);
     this.fetchImpl = fetchImpl;
     this.getAccessToken = getAccessToken;
     this.timeoutMs = timeoutMs;

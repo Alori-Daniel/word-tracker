@@ -1,3 +1,5 @@
+import type { DictionaryAttribution } from './dictionary';
+
 export const LEARNING_STATUSES = ['learning', 'familiar', 'mastered'] as const;
 export const REVIEW_RESPONSES = ['know', 'not_sure', 'forgot'] as const;
 export const SYNC_STATUSES = ['local', 'pending', 'synced', 'error'] as const;
@@ -33,6 +35,7 @@ export type VocabularyWord = {
   word: string;
   pronunciation: string | null;
   definition: string;
+  definitionAttribution: DictionaryAttribution | null;
   simpleDefinition: string | null;
   partOfSpeech: string | null;
   examples: string[];
@@ -55,6 +58,7 @@ export type CreateWordInput = {
   word: string;
   pronunciation?: string | null;
   definition?: string;
+  definitionAttribution?: DictionaryAttribution | null;
   simpleDefinition?: string | null;
   partOfSpeech?: string | null;
   examples?: readonly string[];

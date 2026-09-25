@@ -7,6 +7,7 @@ import type {
   VocabularyWord,
   WordListOptions,
 } from '@/domain/vocabulary';
+import type { DictionaryAttribution } from '@/domain/dictionary';
 
 import type { WordRow } from '../database/rows';
 import {
@@ -24,6 +25,16 @@ export class DuplicateWordError extends Error {
     super(`“${word}” is already in this vocabulary vault.`);
     this.name = 'DuplicateWordError';
   }
+}
+
+function attributionParameters(attribution: DictionaryAttribution | null | undefined) {
+  return {
+    providerName: normalizeOptionalText(attribution?.providerName),
+    providerUrl: normalizeOptionalText(attribution?.providerUrl),
+    sourceUrl: normalizeOptionalText(attribution?.sourceUrl),
+    licenseName: normalizeOptionalText(attribution?.licenseName),
+    licenseUrl: normalizeOptionalText(attribution?.licenseUrl),
+  };
 }
 
 export class WordRepository {
@@ -106,15 +117,22 @@ export class WordRepository {
 
     const id = this.dependencies.createId();
     const timestamp = this.dependencies.now();
+    const definitionAttribution = attributionParameters(input.definitionAttribution);
 
     await this.database.runAsync(
       `INSERT INTO words (
          id, user_id, local_user_id, word, normalized_word, pronunciation, definition,
+         definition_provider_name, definition_provider_url, definition_source_url,
+         definition_license_name,
+         definition_license_url,
          simple_definition, part_of_speech, examples_json, synonyms_json, antonyms_json,
          personal_notes, source, source_sentence, category_id, status, is_favorite,
          next_review_at, sync_status, revision, created_at, updated_at, deleted_at
        ) VALUES (
          $id, $userId, $localUserId, $word, $normalizedWord, $pronunciation, $definition,
+         $definitionProviderName, $definitionProviderUrl, $definitionSourceUrl,
+         $definitionLicenseName,
+         $definitionLicenseUrl,
          $simpleDefinition, $partOfSpeech, $examplesJson, $synonymsJson, $antonymsJson,
          $personalNotes, $source, $sourceSentence, $categoryId, $status, $isFavorite,
          $nextReviewAt, $syncStatus, 1, $createdAt, $updatedAt, NULL
@@ -127,6 +145,11 @@ export class WordRepository {
         $normalizedWord: normalizedWord,
         $pronunciation: normalizeOptionalText(input.pronunciation),
         $definition: input.definition?.normalize('NFKC').trim() ?? '',
+        $definitionProviderName: definitionAttribution.providerName,
+        $definitionProviderUrl: definitionAttribution.providerUrl,
+        $definitionSourceUrl: definitionAttribution.sourceUrl,
+        $definitionLicenseName: definitionAttribution.licenseName,
+        $definitionLicenseUrl: definitionAttribution.licenseUrl,
         $simpleDefinition: normalizeOptionalText(input.simpleDefinition),
         $partOfSpeech: normalizeOptionalText(input.partOfSpeech),
         $examplesJson: serializeStringList(input.examples),
@@ -169,6 +192,11 @@ export class WordRepository {
     }
 
     const timestamp = this.dependencies.now();
+    const definitionAttribution = attributionParameters(
+      input.definitionAttribution === undefined
+        ? existing.definitionAttribution
+        : input.definitionAttribution,
+    );
 
     await this.database.runAsync(
       `UPDATE words SET
@@ -176,6 +204,11 @@ export class WordRepository {
          normalized_word = $normalizedWord,
          pronunciation = $pronunciation,
          definition = $definition,
+         definition_provider_name = $definitionProviderName,
+         definition_provider_url = $definitionProviderUrl,
+         definition_source_url = $definitionSourceUrl,
+         definition_license_name = $definitionLicenseName,
+         definition_license_url = $definitionLicenseUrl,
          simple_definition = $simpleDefinition,
          part_of_speech = $partOfSpeech,
          examples_json = $examplesJson,
@@ -208,6 +241,11 @@ export class WordRepository {
           input.definition === undefined
             ? existing.definition
             : input.definition.normalize('NFKC').trim(),
+        $definitionProviderName: definitionAttribution.providerName,
+        $definitionProviderUrl: definitionAttribution.providerUrl,
+        $definitionSourceUrl: definitionAttribution.sourceUrl,
+        $definitionLicenseName: definitionAttribution.licenseName,
+        $definitionLicenseUrl: definitionAttribution.licenseUrl,
         $simpleDefinition:
           input.simpleDefinition === undefined
             ? existing.simpleDefinition

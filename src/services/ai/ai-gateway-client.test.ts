@@ -48,6 +48,12 @@ describe('AiGatewayClient', () => {
       client.generateWordSuggestion({
         word: '  Ephemeral  ',
         context: 'A fleeting moment.',
+        dictionaryGrounding: {
+          definition: 'Lasting for a very short time.',
+          partOfSpeech: 'adjective',
+          example: null,
+          sourceName: 'Free Dictionary API',
+        },
       }),
     ).resolves.toEqual(
       expect.objectContaining({
@@ -65,7 +71,15 @@ describe('AiGatewayClient', () => {
       }),
     );
     expect(JSON.parse(String(options?.body))).toEqual(
-      expect.objectContaining({ version: 1, word: 'Ephemeral', locale: 'en' }),
+      expect.objectContaining({
+        version: 1,
+        word: 'Ephemeral',
+        locale: 'en',
+        dictionaryGrounding: expect.objectContaining({
+          definition: 'Lasting for a very short time.',
+          sourceName: 'Free Dictionary API',
+        }),
+      }),
     );
   });
 

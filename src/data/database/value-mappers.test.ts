@@ -15,6 +15,11 @@ const baseWordRow: WordRow = {
   normalized_word: 'ephemeral',
   pronunciation: '/ɪˈfɛm(ə)rəl/',
   definition: 'Lasting for a very short time.',
+  definition_provider_name: 'Free Dictionary API',
+  definition_provider_url: 'https://dictionaryapi.dev/',
+  definition_source_url: 'https://en.wiktionary.org/wiki/ephemeral',
+  definition_license_name: 'CC BY-SA 3.0',
+  definition_license_url: 'https://creativecommons.org/licenses/by-sa/3.0',
   simple_definition: 'Short-lived.',
   part_of_speech: 'adjective',
   examples_json: '["A brief moment"]',
@@ -61,6 +66,13 @@ describe('database value mappers', () => {
       examples: ['A brief moment'],
       isFavorite: true,
       status: 'learning',
+      definitionAttribution: {
+        providerName: 'Free Dictionary API',
+        providerUrl: 'https://dictionaryapi.dev/',
+        sourceUrl: 'https://en.wiktionary.org/wiki/ephemeral',
+        licenseName: 'CC BY-SA 3.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0',
+      },
     });
   });
 });

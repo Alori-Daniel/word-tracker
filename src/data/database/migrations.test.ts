@@ -22,4 +22,18 @@ describe('database migrations', () => {
       3,
     );
   });
+
+  it('adds separate dictionary attribution fields without overloading reading context', () => {
+    const attributionMigration = databaseMigrations[1].sql;
+
+    for (const column of [
+      'definition_provider_name',
+      'definition_provider_url',
+      'definition_source_url',
+      'definition_license_name',
+      'definition_license_url',
+    ]) {
+      expect(attributionMigration).toContain(`ADD COLUMN ${column} TEXT`);
+    }
+  });
 });
