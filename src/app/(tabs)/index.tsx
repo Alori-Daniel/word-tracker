@@ -5,12 +5,14 @@ import { ScrollView, View } from 'react-native';
 
 import { AppButton, AppText, Card, PageHeader, Screen } from '@/components/ui';
 import { showGoogleSignInNotice } from '@/features/auth/google-sign-in-notice';
+import { useReview } from '@/features/review';
 import { useVocabulary, WordListItem } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
 
 export default function HomeScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
+  const { dueCount } = useReview();
   const { categories, recentWords, wordCount } = useVocabulary();
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -61,6 +63,27 @@ export default function HomeScreen() {
             </AppText>
           </Card>
         </View>
+
+        {dueCount > 0 ? (
+          <Card style={styles.reviewCard}>
+            <View style={styles.reviewIcon}>
+              <MaterialIcons color={theme.colors.brand.primary} name="school" size={24} />
+            </View>
+            <View style={styles.reviewCopy}>
+              <AppText variant="label">
+                {dueCount} {dueCount === 1 ? 'word is' : 'words are'} ready to review
+              </AppText>
+              <AppText tone="secondary" variant="caption">
+                A short session will help make them stick.
+              </AppText>
+            </View>
+            <AppButton
+              label="Review"
+              onPress={() => router.push('/(tabs)/review')}
+              variant="ghost"
+            />
+          </Card>
+        ) : null}
 
         {recentWords.length > 0 ? (
           <View style={styles.recentSection}>
@@ -145,6 +168,24 @@ const useStyles = createThemedStyles((theme) => ({
   },
   recentSection: {
     gap: theme.spacing.sm,
+  },
+  reviewCard: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  reviewIcon: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.brand.soft,
+    borderRadius: theme.radius.pill,
+    height: 42,
+    justifyContent: 'center',
+    width: 42,
+  },
+  reviewCopy: {
+    flex: 1,
+    gap: theme.spacing.xxs,
   },
   recentHeading: {
     alignItems: 'center',

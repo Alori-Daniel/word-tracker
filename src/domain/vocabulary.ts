@@ -92,3 +92,7 @@ export type VocabularyReview = {
   easeFactor: number;
   createdAt: string;
 };
+
+export type VocabularyReviewHistoryItem = VocabularyReview & {
+  word: string;
+};

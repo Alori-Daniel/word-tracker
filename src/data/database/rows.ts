@@ -61,6 +61,10 @@ export type ReviewRow = {
   created_at: string;
 };
 
+export type ReviewHistoryRow = ReviewRow & {
+  word: string;
+};
+
 export type SettingRow = {
   setting_key: string;
   value_json: string;

@@ -232,6 +232,11 @@ export default function WordDetailScreen() {
             <AppText tone="tertiary" variant="caption">
               UPDATED {formatDate(word.updatedAt)}
             </AppText>
+            {word.nextReviewAt ? (
+              <AppText tone="tertiary" variant="caption">
+                NEXT REVIEW {formatDateTime(word.nextReviewAt)}
+              </AppText>
+            ) : null}
           </Card>
 
           <AppButton
@@ -307,6 +312,11 @@ function LabelledValue({ label, value }: { label: string; value: string }) {
 function formatDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString();
+}
+
+function formatDateTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
 }
 
 const useStyles = createThemedStyles((theme) => ({

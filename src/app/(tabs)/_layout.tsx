@@ -2,10 +2,12 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Redirect, Tabs } from 'expo-router';
 
 import { useLocalData } from '@/data';
+import { useReview } from '@/features/review';
 import { useAppTheme } from '@/theme';
 
 export default function TabLayout() {
   const { settings } = useLocalData();
+  const { dueCount } = useReview();
   const { theme } = useAppTheme();
 
   if (!settings.onboardingCompleted) {
@@ -59,6 +61,12 @@ export default function TabLayout() {
       <Tabs.Screen
         name="review"
         options={{
+          tabBarBadge: dueCount > 0 ? (dueCount > 99 ? '99+' : dueCount) : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: theme.colors.brand.primary,
+            color: theme.colors.brand.onPrimary,
+            fontSize: 10,
+          },
           title: 'Review',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons color={color} name="school" size={size} />

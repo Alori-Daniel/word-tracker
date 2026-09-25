@@ -2,12 +2,15 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type {
   GuestIdentity,
+  LearningStatus,
   ReviewResponse,
   VocabularyReview,
+  VocabularyReviewHistoryItem,
+  VocabularyWord,
 } from '@/domain/vocabulary';
 
-import type { ReviewRow } from '../database/rows';
-import { mapReviewRow } from '../database/value-mappers';
+import type { ReviewHistoryRow, ReviewRow, WordRow } from '../database/rows';
+import { mapReviewRow, mapWordRow } from '../database/value-mappers';
 import type { RepositoryDependencies } from './repository-dependencies';
 
 export type RecordReviewInput = {
@@ -17,6 +20,12 @@ export type RecordReviewInput = {
   nextReviewAt?: string | null;
   intervalDays?: number;
   easeFactor?: number;
+  status: LearningStatus;
+};
+
+export type DueWordOptions = {
+  limit?: number;
+  now: string;
 };
 
 export class ReviewRepository {
@@ -45,6 +54,120 @@ export class ReviewRepository {
     );
 
     return rows.map(mapReviewRow);
+  }
+
+  async getLatestForWord(wordId: string): Promise<VocabularyReview | null> {
+    const row = await this.database.getFirstAsync<ReviewRow>(
+      `SELECT reviews.*
+       FROM reviews
+       INNER JOIN words ON words.id = reviews.word_id
+       WHERE reviews.word_id = $wordId
+         AND words.deleted_at IS NULL
+         AND (
+           words.local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND words.user_id = $userId)
+         )
+       ORDER BY reviews.reviewed_at DESC
+       LIMIT 1`,
+      {
+        $wordId: wordId,
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+      },
+    );
+
+    return row ? mapReviewRow(row) : null;
+  }
+
+  async listDue({ now, limit = 50 }: DueWordOptions): Promise<VocabularyWord[]> {
+    const boundedLimit = Math.min(Math.max(limit, 1), 200);
+    const rows = await this.database.getAllAsync<WordRow>(
+      `SELECT *
+       FROM words
+       WHERE deleted_at IS NULL
+         AND (
+           local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND user_id = $userId)
+         )
+         AND (next_review_at IS NULL OR next_review_at <= $now)
+       ORDER BY
+         CASE WHEN next_review_at IS NULL THEN 1 ELSE 0 END ASC,
+         next_review_at ASC,
+         created_at ASC
+       LIMIT $limit`,
+      {
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+        $now: now,
+        $limit: boundedLimit,
+      },
+    );
+
+    return rows.map(mapWordRow);
+  }
+
+  async countDue(now: string): Promise<number> {
+    const row = await this.database.getFirstAsync<{ count: number }>(
+      `SELECT count(*) AS count
+       FROM words
+       WHERE deleted_at IS NULL
+         AND (
+           local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND user_id = $userId)
+         )
+         AND (next_review_at IS NULL OR next_review_at <= $now)`,
+      {
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+        $now: now,
+      },
+    );
+
+    return row?.count ?? 0;
+  }
+
+  async countReviewedSince(since: string): Promise<number> {
+    const row = await this.database.getFirstAsync<{ count: number }>(
+      `SELECT count(*) AS count
+       FROM reviews
+       INNER JOIN words ON words.id = reviews.word_id
+       WHERE reviews.reviewed_at >= $since
+         AND words.deleted_at IS NULL
+         AND (
+           words.local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND words.user_id = $userId)
+         )`,
+      {
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+        $since: since,
+      },
+    );
+
+    return row?.count ?? 0;
+  }
+
+  async listRecent(limit = 5): Promise<VocabularyReviewHistoryItem[]> {
+    const boundedLimit = Math.min(Math.max(limit, 1), 50);
+    const rows = await this.database.getAllAsync<ReviewHistoryRow>(
+      `SELECT reviews.*, words.word
+       FROM reviews
+       INNER JOIN words ON words.id = reviews.word_id
+       WHERE words.deleted_at IS NULL
+         AND (
+           words.local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND words.user_id = $userId)
+         )
+       ORDER BY reviews.reviewed_at DESC
+       LIMIT $limit`,
+      {
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+        $limit: boundedLimit,
+      },
+    );
+
+    return rows.map((row) => ({ ...mapReviewRow(row), word: row.word }));
   }
 
   async record(input: RecordReviewInput): Promise<VocabularyReview> {
@@ -91,6 +214,7 @@ export class ReviewRepository {
       await this.database.runAsync(
         `UPDATE words SET
            next_review_at = $nextReviewAt,
+           status = $status,
            updated_at = $updatedAt,
            revision = revision + 1,
            sync_status = $syncStatus
@@ -102,6 +226,7 @@ export class ReviewRepository {
            )`,
         {
           $nextReviewAt: input.nextReviewAt ?? null,
+          $status: input.status,
           $updatedAt: timestamp,
           $syncStatus: this.identity.linkedUserId ? 'pending' : 'local',
           $wordId: input.wordId,
