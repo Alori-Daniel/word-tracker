@@ -1,0 +1,135 @@
+import { ScrollView, View } from 'react-native';
+
+import { AppText, Card, Screen, ThemeModeSelector } from '@/components/ui';
+import { createThemedStyles, useAppTheme } from '@/theme';
+
+const FOUNDATIONS = [
+  'Expo Router with typed routes',
+  'Structured light and dark color tokens',
+  'Reusable themed UI primitives',
+  'Lint, typecheck, and test commands',
+] as const;
+
+export default function FoundationScreen() {
+  const styles = useStyles();
+  const { resolvedMode } = useAppTheme();
+
+  return (
+    <Screen edges={['top', 'right', 'bottom', 'left']}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.hero}>
+          <AppText style={styles.eyebrow} variant="caption">
+            VOCABULARY VAULT
+          </AppText>
+          <AppText variant="display">Words worth keeping.</AppText>
+          <AppText tone="secondary">
+            Capture the language you discover, then turn it into knowledge that stays with you.
+          </AppText>
+        </View>
+
+        <Card style={styles.section}>
+          <AppText variant="subtitle">Appearance</AppText>
+          <AppText tone="secondary">
+            The app currently resolves to {resolvedMode} mode. Choose a preference to review both
+            palettes.
+          </AppText>
+          <ThemeModeSelector />
+        </Card>
+
+        <Card style={styles.section}>
+          <AppText variant="subtitle">Stage 1 foundation</AppText>
+          <View style={styles.list}>
+            {FOUNDATIONS.map((foundation) => (
+              <View key={foundation} style={styles.listItem}>
+                <View style={styles.checkmark} />
+                <AppText style={styles.listText}>{foundation}</AppText>
+              </View>
+            ))}
+          </View>
+        </Card>
+
+        <View style={styles.statusRow}>
+          <View style={[styles.status, styles.learning]}>
+            <AppText style={styles.learningText} variant="caption">
+              Learning
+            </AppText>
+          </View>
+          <View style={[styles.status, styles.familiar]}>
+            <AppText style={styles.familiarText} variant="caption">
+              Familiar
+            </AppText>
+          </View>
+          <View style={[styles.status, styles.mastered]}>
+            <AppText style={styles.masteredText} variant="caption">
+              Mastered
+            </AppText>
+          </View>
+        </View>
+      </ScrollView>
+    </Screen>
+  );
+}
+
+const useStyles = createThemedStyles((theme) => ({
+  content: {
+    gap: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.xl,
+  },
+  hero: {
+    gap: theme.spacing.sm,
+    maxWidth: 640,
+  },
+  eyebrow: {
+    color: theme.colors.brand.primary,
+    letterSpacing: 1.6,
+  },
+  section: {
+    gap: theme.spacing.md,
+  },
+  list: {
+    gap: theme.spacing.sm,
+  },
+  listItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  checkmark: {
+    backgroundColor: theme.colors.semantic.success.foreground,
+    borderRadius: theme.radius.pill,
+    height: 8,
+    marginRight: theme.spacing.sm,
+    width: 8,
+  },
+  listText: {
+    flex: 1,
+  },
+  statusRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.xs,
+  },
+  status: {
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+  },
+  learning: {
+    backgroundColor: theme.colors.learningStatus.learning.background,
+  },
+  learningText: {
+    color: theme.colors.learningStatus.learning.foreground,
+  },
+  familiar: {
+    backgroundColor: theme.colors.learningStatus.familiar.background,
+  },
+  familiarText: {
+    color: theme.colors.learningStatus.familiar.foreground,
+  },
+  mastered: {
+    backgroundColor: theme.colors.learningStatus.mastered.background,
+  },
+  masteredText: {
+    color: theme.colors.learningStatus.mastered.foreground,
+  },
+}));
