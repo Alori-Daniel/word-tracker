@@ -62,7 +62,7 @@ function Action({
   );
 }
 
-export function renderVocabularyVaultAndroidWidget(
+export function renderWordEchoAndroidWidget(
   snapshot: VocabularyWidgetSnapshot,
   widgetInfo: WidgetInfo,
   isDark: boolean,
@@ -77,7 +77,7 @@ export function renderVocabularyVaultAndroidWidget(
   if (!currentWord) {
     return (
       <FlexWidget
-        accessibilityLabel="Vocabulary Vault widget. No words match the current filter."
+        accessibilityLabel="WordEcho widget. No words match the current filter."
         clickAction="OPEN_URI"
         clickActionData={{ uri: vocabularyWidgetLinks.addWord }}
         style={{
@@ -91,7 +91,7 @@ export function renderVocabularyVaultAndroidWidget(
         }}
       >
         <TextWidget
-          text="VOCABULARY VAULT"
+          text="WORDECHO"
           maxLines={1}
           style={{ color: colors.accent, fontSize: 11, fontWeight: '700' }}
         />
@@ -168,7 +168,7 @@ export function renderVocabularyVaultAndroidWidget(
           />
         ) : null}
         <TextWidget
-          text={currentWord.definition || 'Open Vocabulary Vault to add a meaning.'}
+          text={currentWord.definition || 'Open WordEcho to add a meaning.'}
           maxLines={isSmall ? 3 : isLarge ? 5 : 3}
           style={{
             color: colors.primary,
@@ -215,22 +215,22 @@ function representationForTheme(
   themeMode: WidgetThemeMode,
 ): WidgetRepresentation {
   if (themeMode === 'light') {
-    const widget = renderVocabularyVaultAndroidWidget(snapshot, widgetInfo, false);
+    const widget = renderWordEchoAndroidWidget(snapshot, widgetInfo, false);
     return { light: widget, dark: widget };
   }
 
   if (themeMode === 'dark') {
-    const widget = renderVocabularyVaultAndroidWidget(snapshot, widgetInfo, true);
+    const widget = renderWordEchoAndroidWidget(snapshot, widgetInfo, true);
     return { light: widget, dark: widget };
   }
 
   return {
-    light: renderVocabularyVaultAndroidWidget(snapshot, widgetInfo, false),
-    dark: renderVocabularyVaultAndroidWidget(snapshot, widgetInfo, true),
+    light: renderWordEchoAndroidWidget(snapshot, widgetInfo, false),
+    dark: renderWordEchoAndroidWidget(snapshot, widgetInfo, true),
   };
 }
 
-export function createVocabularyVaultAndroidRepresentation(
+export function createWordEchoAndroidRepresentation(
   snapshot: VocabularyWidgetSnapshot,
   widgetInfo: WidgetInfo,
 ): WidgetRepresentation {

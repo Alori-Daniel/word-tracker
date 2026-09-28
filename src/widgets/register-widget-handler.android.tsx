@@ -10,9 +10,9 @@ import {
   saveVocabularyWidgetSnapshot,
 } from '@/services/widgets/widget-snapshot-storage.android';
 
-import { createVocabularyVaultAndroidRepresentation } from './vocabulary-vault-widget.android';
+import { createWordEchoAndroidRepresentation } from './wordecho-widget.android';
 
-const WIDGET_NAME = 'VocabularyVaultWidget';
+const WIDGET_NAME = 'WordEchoWidget';
 
 function createEmptySnapshot(): VocabularyWidgetSnapshot {
   return {
@@ -41,6 +41,6 @@ registerWidgetTaskHandler(async (props) => {
   }
 
   props.renderWidget(
-    createVocabularyVaultAndroidRepresentation(snapshot, props.widgetInfo),
+    createWordEchoAndroidRepresentation(snapshot, props.widgetInfo),
   );
 });

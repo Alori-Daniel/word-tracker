@@ -1,5 +1,5 @@
 import type { VocabularyWidgetSnapshot } from '@/domain/widget';
-import VocabularyVaultWidget from '@/widgets/vocabulary-vault-widget.ios';
+import WordEchoWidget from '@/widgets/wordecho-widget.ios';
 
 import { toIosPropertyListWidgetSnapshot } from './widget-property-list';
 import { buildVocabularyWidgetTimeline } from './widget-timeline';
@@ -9,7 +9,7 @@ export async function syncVocabularyWidget(
 ): Promise<void> {
   const propertyListSnapshot = toIosPropertyListWidgetSnapshot(snapshot);
 
-  VocabularyVaultWidget.updateTimeline(buildVocabularyWidgetTimeline(propertyListSnapshot));
+  WordEchoWidget.updateTimeline(buildVocabularyWidgetTimeline(propertyListSnapshot));
 }
 
 export async function requestPinVocabularyWidget(): Promise<boolean> {

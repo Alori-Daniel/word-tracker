@@ -1,12 +1,12 @@
-# Vocabulary Vault dictionary and AI gateway guide
+# WordEcho dictionary and AI gateway guide
 
 This document explains the Stage 6 lookup and AI architecture in plain language. The short version is: **the mobile app talks to our gateway; the gateway talks to dictionary and AI providers**.
 
 ```text
-Vocabulary Vault app
+WordEcho app
         |
         v
-Vocabulary Vault gateway
+WordEcho gateway
   |                         |
   | free dictionary lookup  | premium AI assistance
   | anonymous + rate limit  | account + plan + quota checks
@@ -47,7 +47,7 @@ The gateway is necessary because an installed mobile app cannot keep a secret. E
 | Server reference handler | `server/ai-gateway/word-assist-handler.ts` | Enforces authentication and authorization hooks, calls the OpenAI Responses API, and validates the structured result. |
 | Configuration examples | `.env.example` and `server/ai-gateway/.env.example` | Clearly separate the public shared gateway URL from server-only secrets. |
 
-The reference handler uses Structured Outputs through `text.format` so the model is asked to return the exact JSON shape Vocabulary Vault expects. The app and gateway still validate the result because network responses must always be treated as untrusted. This follows the current [OpenAI Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
+The reference handler uses Structured Outputs through `text.format` so the model is asked to return the exact JSON shape WordEcho expects. The app and gateway still validate the result because network responses must always be treated as untrusted. This follows the current [OpenAI Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
 
 ## What the user experiences
 

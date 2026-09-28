@@ -12,7 +12,7 @@ export default function AuthCallbackScreen() {
       <View style={styles.content}>
         <ActivityIndicator color={theme.colors.brand.primary} size="large" />
         <AppText variant="subtitle">Completing Google sign-in…</AppText>
-        <AppText tone="secondary">You can return to Vocabulary Vault shortly.</AppText>
+        <AppText tone="secondary">You can return to WordEcho shortly.</AppText>
       </View>
     </Screen>
   );

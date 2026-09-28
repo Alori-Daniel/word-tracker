@@ -16,7 +16,9 @@ import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 
 import type { VocabularyWidgetSnapshot } from '@/domain/widget';
 
-const VocabularyVaultWidgetView = (
+const WORD_ECHO_WIDGET_NAME = 'WordEchoWidget';
+
+const WordEchoWidgetView = (
   props: VocabularyWidgetSnapshot,
   environment: WidgetEnvironment,
 ) => {
@@ -34,7 +36,7 @@ const VocabularyVaultWidgetView = (
     typeof props.currentIndex === 'number' && props.currentIndex >= 0
       ? props.currentIndex
       : 0;
-  const sourceLabel = props.sourceLabel || 'Vocabulary Vault';
+  const sourceLabel = props.sourceLabel || 'WordEcho';
   const isDark =
     preferences.themeMode === 'dark' ||
     (preferences.themeMode === 'system' && environment.colorScheme === 'dark');
@@ -48,14 +50,14 @@ const VocabularyVaultWidgetView = (
   const accent = isDark ? '#8FC5FF' : '#0878B8';
   const word = words.length ? words[currentIndex % words.length] : null;
   const nextIndex = words.length ? (currentIndex + 1) % words.length : 0;
-  const addLink = 'vocabularyvault://add';
-  const reviewLink = 'vocabularyvault://review';
+  const addLink = 'wordecho://add';
+  const reviewLink = 'wordecho://review';
   const openLink = word
-    ? `vocabularyvault://word/${encodeURIComponent(word.id)}`
-    : 'vocabularyvault://add';
+    ? `wordecho://word/${encodeURIComponent(word.id)}`
+    : 'wordecho://add';
   const editLink = word
-    ? `vocabularyvault://word/${encodeURIComponent(word.id)}/edit`
-    : 'vocabularyvault://add';
+    ? `wordecho://word/${encodeURIComponent(word.id)}/edit`
+    : 'wordecho://add';
 
   if (!word) {
     return (
@@ -69,7 +71,7 @@ const VocabularyVaultWidgetView = (
         ]}
       >
         <Text modifiers={[font({ size: 12, weight: 'semibold' }), foregroundStyle(accent)]}>
-          VOCABULARY VAULT
+          WORDECHO
         </Text>
         <Spacer />
         <Text
@@ -163,7 +165,7 @@ const VocabularyVaultWidgetView = (
           multilineTextAlignment('leading'),
         ]}
       >
-        {word.definition || 'Open Vocabulary Vault to add a meaning.'}
+        {word.definition || 'Open WordEcho to add a meaning.'}
       </Text>
 
       {isLarge && word.example ? (
@@ -226,4 +228,4 @@ const VocabularyVaultWidgetView = (
   );
 };
 
-export default createWidget('VocabularyVaultWidget', VocabularyVaultWidgetView);
+export default createWidget(WORD_ECHO_WIDGET_NAME, WordEchoWidgetView);

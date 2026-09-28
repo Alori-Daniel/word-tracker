@@ -1,4 +1,4 @@
--- Vocabulary Vault account and cloud-sync schema.
+-- WordEcho account and cloud-sync schema.
 -- Run with the Supabase CLI or paste into the SQL editor for a new project.
 
 create table if not exists public.profiles (

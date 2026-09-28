@@ -1,4 +1,4 @@
-const APP_SCHEME = 'vocabularyvault';
+const APP_SCHEME = 'wordecho';
 
 function route(path: string): string {
   return `${APP_SCHEME}://${path.replace(/^\/+/, '')}`;

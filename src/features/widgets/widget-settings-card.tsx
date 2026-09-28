@@ -65,8 +65,8 @@ export function WidgetSettingsCard() {
 
     if (!promptOpened) {
       Alert.alert(
-        'Add Vocabulary Vault manually',
-        'Touch and hold an empty area on your Home Screen, choose Widgets, then select Vocabulary Vault.',
+        'Add WordEcho manually',
+        'Touch and hold an empty area on your Home Screen, choose Widgets, then select WordEcho.',
       );
     }
   }
@@ -78,7 +78,7 @@ export function WidgetSettingsCard() {
           <MaterialIcons color={theme.colors.brand.primary} name="widgets" size={24} />
         </View>
         <View style={styles.headingCopy}>
-          <AppText variant="label">Vocabulary Vault widget</AppText>
+          <AppText variant="label">WordEcho widget</AppText>
           <AppText tone="secondary" variant="caption">
             See a useful word and act on it without hunting through the app.
           </AppText>
@@ -154,7 +154,7 @@ export function WidgetSettingsCard() {
       <View style={styles.actionSummary}>
         <MaterialIcons color={theme.colors.content.secondary} name="touch-app" size={19} />
         <AppText style={styles.actionCopy} tone="secondary" variant="caption">
-          Add, Edit, and Review open the right place in Vocabulary Vault. Next changes the
+          Add, Edit, and Review open the right place in WordEcho. Next changes the
           displayed word directly on the widget.
         </AppText>
       </View>

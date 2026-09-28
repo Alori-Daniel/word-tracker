@@ -22,7 +22,7 @@ import type { RepositoryDependencies } from './repository-dependencies';
 
 export class DuplicateWordError extends Error {
   constructor(word: string) {
-    super(`“${word}” is already in this vocabulary vault.`);
+    super(`“${word}” is already in your WordEcho library.`);
     this.name = 'DuplicateWordError';
   }
 }

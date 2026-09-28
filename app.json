@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Word Echo",
-    "slug": "word-tracker",
+    "name": "WordEcho",
+    "slug": "wordecho",
     "scheme": "wordecho",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -53,9 +53,9 @@
           "groupIdentifier": "group.com.danori.wordecho",
           "widgets": [
             {
-              "name": "VocabularyVaultWidget",
-              "displayName": "Vocabulary Vault",
-              "description": "Resurface and act on words from your vocabulary vault.",
+              "name": "WordEchoWidget",
+              "displayName": "WordEcho",
+              "description": "Resurface and act on words from your WordEcho library.",
               "supportedFamilies": [
                 "systemSmall",
                 "systemMedium",
@@ -71,9 +71,9 @@
         {
           "widgets": [
             {
-              "name": "VocabularyVaultWidget",
-              "label": "Vocabulary Vault",
-              "description": "Resurface and act on words from your vocabulary vault.",
+              "name": "WordEchoWidget",
+              "label": "WordEcho",
+              "description": "Resurface and act on words from your WordEcho library.",
               "minWidth": "110dp",
               "minHeight": "180dp",
               "targetCellWidth": 4,

@@ -59,7 +59,7 @@ export function parseVocabularyWidgetSnapshot(
     sourceLabel:
       typeof value.sourceLabel === 'string' && value.sourceLabel.length <= 200
         ? value.sourceLabel
-        : 'Vocabulary Vault',
+        : 'WordEcho',
   };
 }
 

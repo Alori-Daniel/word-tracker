@@ -68,7 +68,7 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
       setRevision((value) => value + 1);
     } catch (nextError) {
       setError(
-        nextError instanceof Error ? nextError : new Error('The vocabulary vault could not load.'),
+        nextError instanceof Error ? nextError : new Error('Your WordEcho library could not load.'),
       );
     } finally {
       setIsLoading(false);

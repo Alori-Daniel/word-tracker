@@ -52,7 +52,7 @@ export default function WelcomeScreen() {
           <View style={styles.brandMark}>
             <MaterialIcons color={theme.colors.brand.onPrimary} name="auto-stories" size={26} />
           </View>
-          <AppText variant="label">Vocabulary Vault</AppText>
+          <AppText variant="label">WordEcho</AppText>
         </View>
 
         <View style={styles.hero}>

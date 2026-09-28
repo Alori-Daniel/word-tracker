@@ -1,4 +1,4 @@
-# Vocabulary Vault account and cloud setup
+# WordEcho account and cloud setup
 
 The account and cloud foundation adds optional Google sign-in and cloud backup without changing the guest-first product philosophy. The app is still fully usable without an account. When a guest chooses Google sign-in, their existing local categories, words, attribution, and review history are attached to the account and merged into its cloud vault.
 
@@ -32,7 +32,7 @@ Replace the matching local snapshot transactionally
 | Local migration      | `GuestIdentityRepository.linkAccount`           | Attaches local categories, words, and reviews to the authenticated account in one SQLite transaction.                    |
 | Local sync boundary  | `VaultSyncRepository`                           | Exports an account snapshot and applies the cloud result only if the local vault did not change during the request.      |
 | Cloud sync client    | `src/services/cloud/`                           | Calls the single `sync_vault` RPC, validates its result, and retries once after a concurrent local edit.                 |
-| Cloud schema and RLS | `supabase/migrations/0001_vocabulary_vault.sql` | Creates account-owned tables, policies, natural-key merging, and the transactional sync function.                        |
+| Cloud schema and RLS | `supabase/migrations/0001_wordecho.sql` | Creates account-owned tables, policies, natural-key merging, and the transactional sync function.                        |
 
 Local mutations queue a sync after one second. Sign-in, app session restoration, and the **Sync now** button also trigger sync. If networking or cloud configuration fails, the local SQLite vault remains the working copy.
 
@@ -57,7 +57,7 @@ The publishable key is intentionally used in the mobile app. It is not a server 
 
 ### 2. Apply the database migration
 
-Use the Supabase CLI migration workflow or run [the included SQL migration](../supabase/migrations/0001_vocabulary_vault.sql) in the project SQL editor.
+Use the Supabase CLI migration workflow or run [the included SQL migration](../supabase/migrations/0001_wordecho.sql) in the project SQL editor.
 
 The migration creates:
 
@@ -82,7 +82,7 @@ In Google Auth Platform:
 In **Authentication → URL Configuration → Additional Redirect URLs**, add:
 
 ```text
-vocabularyvault://auth/callback
+wordecho://auth/callback
 ```
 
 Also add the exact HTTPS origin/callback used by the web build if web sign-in will be enabled. Development builds are recommended for testing the stable custom-scheme callback; do not rely on Expo Go callback URLs for production OAuth configuration.
@@ -104,6 +104,14 @@ Because `expo-web-browser` adds native configuration, create a new development b
 npx eas-cli@latest build --profile development
 ```
 
+### Future native Google Sign-In
+
+The browser OAuth flow remains the production path for now. A future Universal Google
+Sign-In adapter can replace only the provider interaction and exchange its Google ID token
+through `supabase.auth.signInWithIdToken`. Supabase remains the canonical session provider,
+so guest migration, account state, cloud sync, and the rest of the UI do not need to change.
+Keep `wordecho://auth/callback` available as a browser and web fallback after that migration.
+
 ## Account behavior
 
 - Authentication is never forced during onboarding.
@@ -116,7 +124,7 @@ npx eas-cli@latest build --profile development
 ## Production checklist
 
 - [ ] Google provider is enabled and its consent screen is branded.
-- [ ] `vocabularyvault://auth/callback` is in the Supabase redirect allow list.
+- [ ] `wordecho://auth/callback` is in the Supabase redirect allow list.
 - [ ] The migration has run successfully in development and production projects.
 - [ ] RLS is enabled on every vault table.
 - [ ] Only the publishable key is present in Expo environment variables.

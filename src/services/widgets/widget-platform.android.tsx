@@ -1,23 +1,23 @@
 import { requestPinWidget, requestWidgetUpdate } from 'react-native-android-widget';
 
 import type { VocabularyWidgetSnapshot } from '@/domain/widget';
-import { createVocabularyVaultAndroidRepresentation } from '@/widgets/vocabulary-vault-widget.android';
+import { createWordEchoAndroidRepresentation } from '@/widgets/wordecho-widget.android';
 
 import { saveVocabularyWidgetSnapshot } from './widget-snapshot-storage.android';
 
-export const VOCABULARY_VAULT_WIDGET_NAME = 'VocabularyVaultWidget';
+export const WORD_ECHO_WIDGET_NAME = 'WordEchoWidget';
 
 export async function syncVocabularyWidget(
   snapshot: VocabularyWidgetSnapshot,
 ): Promise<void> {
   await saveVocabularyWidgetSnapshot(snapshot);
   await requestWidgetUpdate({
-    widgetName: VOCABULARY_VAULT_WIDGET_NAME,
+    widgetName: WORD_ECHO_WIDGET_NAME,
     renderWidget: (widgetInfo) =>
-      createVocabularyVaultAndroidRepresentation(snapshot, widgetInfo),
+      createWordEchoAndroidRepresentation(snapshot, widgetInfo),
   });
 }
 
 export function requestPinVocabularyWidget(): Promise<boolean> {
-  return requestPinWidget({ widgetName: VOCABULARY_VAULT_WIDGET_NAME });
+  return requestPinWidget({ widgetName: WORD_ECHO_WIDGET_NAME });
 }

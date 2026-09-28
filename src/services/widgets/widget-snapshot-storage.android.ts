@@ -4,7 +4,7 @@ import type { VocabularyWidgetSnapshot } from '@/domain/widget';
 
 import { deserializeVocabularyWidgetSnapshot } from './widget-snapshot-codec';
 
-const WIDGET_DATABASE_NAME = 'vocabulary-vault-widget.db';
+const WIDGET_DATABASE_NAME = 'wordecho-widget.db';
 const WIDGET_SNAPSHOT_KEY = 'vocabulary_widget_snapshot';
 
 const widgetStorage = new SQLiteStorage(WIDGET_DATABASE_NAME);

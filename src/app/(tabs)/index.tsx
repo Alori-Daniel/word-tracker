@@ -32,7 +32,7 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <PageHeader
           description="Collect words you want to remember and make them part of your vocabulary."
-          eyebrow="Vocabulary Vault"
+          eyebrow="WordEcho"
           title="Your words, remembered."
         />
 

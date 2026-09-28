@@ -4,7 +4,7 @@ import { accountProfileFromSession, parseOAuthCallback } from './supabase-google
 
 describe('Supabase Google OAuth helpers', () => {
   it('parses a PKCE authorization code callback', () => {
-    expect(parseOAuthCallback('vocabularyvault://auth/callback?code=code-123')).toEqual({
+    expect(parseOAuthCallback('wordecho://auth/callback?code=code-123')).toEqual({
       type: 'code',
       code: 'code-123',
     });
@@ -13,7 +13,7 @@ describe('Supabase Google OAuth helpers', () => {
   it('supports an implicit token callback as a compatibility fallback', () => {
     expect(
       parseOAuthCallback(
-        'vocabularyvault://auth/callback#access_token=access-1&refresh_token=refresh-1',
+        'wordecho://auth/callback#access_token=access-1&refresh_token=refresh-1',
       ),
     ).toEqual({
       type: 'tokens',

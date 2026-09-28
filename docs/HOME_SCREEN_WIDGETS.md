@@ -1,6 +1,6 @@
-# Vocabulary Vault Home Screen widgets
+# WordEcho Home Screen widgets
 
-Stage 7 adds a native Vocabulary Vault widget for both iOS and Android. Its purpose is to make saved words visible during the day and provide quick routes back into the vault.
+Stage 7 adds a native WordEcho widget for both iOS and Android. Its purpose is to make saved words visible during the day and provide quick routes back into the library.
 
 ## What the widget shows
 
@@ -9,7 +9,7 @@ The layout responds to the available widget size:
 - the selected word and its meaning are always the visual focus;
 - pronunciation and part of speech appear when available;
 - a saved example appears in the large layout;
-- the dark appearance uses the Vocabulary Vault blue palette;
+- the dark appearance uses the WordEcho blue palette;
 - the empty state sends the user directly to **Add word**.
 
 The actions are deliberately predictable:
@@ -39,7 +39,7 @@ Preferences remain local and guest-friendly. Whenever words, categories, or widg
 
 ### iOS
 
-`expo-widgets` supplies the WidgetKit target and renders the view from `src/widgets/vocabulary-vault-widget.ios.tsx`. The app publishes a timeline so iOS can rotate words even while the main app is closed. Interactive **Next** uses the iOS widget button API; links use the `vocabularyvault` app scheme.
+`expo-widgets` supplies the WidgetKit target and renders the view from `src/widgets/wordecho-widget.ios.tsx`. The app publishes a timeline so iOS can rotate words even while the main app is closed. Interactive **Next** uses the iOS widget button API; links use the `wordecho` app scheme.
 
 Interactive widget buttons require iOS 17 or newer. The Add, Edit, Review, and word links remain regular widget links; iOS 16.4 users can still open those destinations and receive timeline-based word rotation.
 
@@ -73,15 +73,15 @@ npx expo run:ios
 npx expo run:android
 ```
 
-EAS development builds are also supported. After installing the build, add **Vocabulary Vault** from the system widget picker. Android can also use the in-app pin button.
+EAS development builds are also supported. After installing the build, add **WordEcho** from the system widget picker. Android can also use the in-app pin button.
 
 ## Key files
 
 | Location | Responsibility |
 | --- | --- |
 | `app.json` | Native IDs, iOS widget target, and Android receiver configuration. |
-| `src/widgets/vocabulary-vault-widget.ios.tsx` | Responsive WidgetKit UI and interactive actions. |
-| `src/widgets/vocabulary-vault-widget.android.tsx` | Responsive Android widget representation. |
+| `src/widgets/wordecho-widget.ios.tsx` | Responsive WidgetKit UI and interactive actions. |
+| `src/widgets/wordecho-widget.android.tsx` | Responsive Android widget representation. |
 | `src/widgets/register-widget-handler.android.tsx` | Android lifecycle, periodic update, and **Next** click handler. |
 | `src/features/widgets/widget-sync-provider.tsx` | Publishes a fresh snapshot after vault changes. |
 | `src/features/widgets/widget-settings-card.tsx` | User-facing widget preferences and Android pin action. |

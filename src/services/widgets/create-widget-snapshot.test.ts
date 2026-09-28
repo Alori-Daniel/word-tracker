@@ -197,7 +197,7 @@ describe('Vocabulary widget boundaries', () => {
       DEFAULT_WIDGET_PREFERENCES,
     );
     expect(vocabularyWidgetLinks.editWord('word/with space')).toBe(
-      'vocabularyvault://word/word%2Fwith%20space/edit',
+      'wordecho://word/word%2Fwith%20space/edit',
     );
   });
 

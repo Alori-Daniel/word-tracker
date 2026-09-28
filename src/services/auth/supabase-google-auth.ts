@@ -77,7 +77,7 @@ export class SupabaseGoogleAuth {
   async signIn(): Promise<Session | null> {
     const redirectTo = makeRedirectUri({
       path: 'auth/callback',
-      scheme: 'vocabularyvault',
+      scheme: 'wordecho',
     });
     const { data, error } = await this.client.auth.signInWithOAuth({
       provider: 'google',
