@@ -22,9 +22,22 @@ const VocabularyVaultWidgetView = (
 ) => {
   'widget';
 
+  // WidgetKit renders gallery previews with empty props before the app publishes a timeline.
+  const preferences = props.preferences ?? {
+    categoryId: null,
+    contentSource: 'learning',
+    rotationMinutes: 60,
+    themeMode: 'system',
+  };
+  const words = props.words ?? [];
+  const currentIndex =
+    typeof props.currentIndex === 'number' && props.currentIndex >= 0
+      ? props.currentIndex
+      : 0;
+  const sourceLabel = props.sourceLabel || 'Vocabulary Vault';
   const isDark =
-    props.preferences.themeMode === 'dark' ||
-    (props.preferences.themeMode === 'system' && environment.colorScheme === 'dark');
+    preferences.themeMode === 'dark' ||
+    (preferences.themeMode === 'system' && environment.colorScheme === 'dark');
   const isSmall = environment.widgetFamily === 'systemSmall';
   const isLarge =
     environment.widgetFamily === 'systemLarge' ||
@@ -33,9 +46,8 @@ const VocabularyVaultWidgetView = (
   const primaryText = isDark ? '#F3F6FB' : '#17202B';
   const secondaryText = isDark ? '#B8C9DD' : '#5A6878';
   const accent = isDark ? '#8FC5FF' : '#0878B8';
-  const words = props.words;
-  const word = words.length ? words[props.currentIndex % words.length] : null;
-  const nextIndex = words.length ? (props.currentIndex + 1) % words.length : 0;
+  const word = words.length ? words[currentIndex % words.length] : null;
+  const nextIndex = words.length ? (currentIndex + 1) % words.length : 0;
   const addLink = 'vocabularyvault://add';
   const reviewLink = 'vocabularyvault://review';
   const openLink = word
@@ -104,7 +116,7 @@ const VocabularyVaultWidgetView = (
             lineLimit(1),
           ]}
         >
-          {props.sourceLabel.toUpperCase()}
+          {sourceLabel.toUpperCase()}
         </Text>
         <Spacer />
         <Link
@@ -194,7 +206,15 @@ const VocabularyVaultWidgetView = (
           label="Next"
           systemImage="arrow.right"
           target="next-word"
-          onPress={() => ({ ...props, currentIndex: nextIndex })}
+          onPress={() => ({
+            ...props,
+            currentIndex: nextIndex,
+            generatedAt: props.generatedAt || '',
+            preferences,
+            sourceLabel,
+            version: 1,
+            words,
+          })}
           modifiers={[
             buttonStyle('borderedProminent'),
             controlSize('mini'),

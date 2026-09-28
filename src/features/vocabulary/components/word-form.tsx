@@ -114,7 +114,7 @@ export function WordForm({
           value={values.word}
         />
         <DictionaryLookupPanel
-          key={values.word}
+          key={`dictionary:${values.word}`}
           onSelect={(selection) => {
             setValues((current) => applyDictionarySenseToWordForm(current, selection));
             setDictionaryGrounding(toAiDictionaryGrounding(selection));
@@ -148,7 +148,7 @@ export function WordForm({
           context={values.sourceSentence}
           dictionaryGrounding={dictionaryGrounding}
           existingDefinition={values.definition}
-          key={values.word}
+          key={`ai:${values.word}`}
           onApply={(suggestion) =>
             setValues((current) => applyAiSuggestionToWordForm(current, suggestion))
           }

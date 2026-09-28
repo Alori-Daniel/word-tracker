@@ -24,15 +24,15 @@ Replace the matching local snapshot transactionally
 
 ## What is implemented
 
-| Part | Location | Responsibility |
-| --- | --- | --- |
-| Account state | `src/features/auth/account-provider.tsx` | Restores sessions, links guest data, exposes sign-in/sign-out, schedules sync, and supplies the AI gateway access token. |
-| Google OAuth | `src/services/auth/supabase-google-auth.ts` | Starts Supabase Google OAuth through Expo WebBrowser and exchanges the PKCE callback for a session. |
-| Supabase client | `src/services/supabase/` | Creates a lazy client only when valid public configuration exists and persists sessions with Expo SQLite local storage. |
-| Local migration | `GuestIdentityRepository.linkAccount` | Attaches local categories, words, and reviews to the authenticated account in one SQLite transaction. |
-| Local sync boundary | `VaultSyncRepository` | Exports an account snapshot and applies the cloud result only if the local vault did not change during the request. |
-| Cloud sync client | `src/services/cloud/` | Calls the single `sync_vault` RPC, validates its result, and retries once after a concurrent local edit. |
-| Cloud schema and RLS | `supabase/migrations/0001_vocabulary_vault.sql` | Creates account-owned tables, policies, natural-key merging, and the transactional sync function. |
+| Part                 | Location                                        | Responsibility                                                                                                           |
+| -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Account state        | `src/features/auth/account-provider.tsx`        | Restores sessions, links guest data, exposes sign-in/sign-out, schedules sync, and supplies the AI gateway access token. |
+| Google OAuth         | `src/services/auth/supabase-google-auth.ts`     | Starts Supabase Google OAuth through Expo WebBrowser and exchanges the PKCE callback for a session.                      |
+| Supabase client      | `src/services/supabase/`                        | Creates a lazy client only when valid public configuration exists and persists sessions with Expo SQLite local storage.  |
+| Local migration      | `GuestIdentityRepository.linkAccount`           | Attaches local categories, words, and reviews to the authenticated account in one SQLite transaction.                    |
+| Local sync boundary  | `VaultSyncRepository`                           | Exports an account snapshot and applies the cloud result only if the local vault did not change during the request.      |
+| Cloud sync client    | `src/services/cloud/`                           | Calls the single `sync_vault` RPC, validates its result, and retries once after a concurrent local edit.                 |
+| Cloud schema and RLS | `supabase/migrations/0001_vocabulary_vault.sql` | Creates account-owned tables, policies, natural-key merging, and the transactional sync function.                        |
 
 Local mutations queue a sync after one second. Sign-in, app session restoration, and the **Sync now** button also trigger sync. If networking or cloud configuration fails, the local SQLite vault remains the working copy.
 

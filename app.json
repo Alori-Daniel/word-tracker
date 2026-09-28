@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Vocabulary Vault",
+    "name": "Word Echo",
     "slug": "word-tracker",
-    "scheme": "vocabularyvault",
+    "scheme": "wordecho",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

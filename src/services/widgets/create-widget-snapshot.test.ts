@@ -15,6 +15,7 @@ import {
   deserializeVocabularyWidgetSnapshot,
   parseVocabularyWidgetSnapshot,
 } from './widget-snapshot-codec';
+import { toIosPropertyListWidgetSnapshot } from './widget-property-list';
 import { buildVocabularyWidgetTimeline } from './widget-timeline';
 
 const NOW = new Date('2026-09-25T12:00:00.000Z');
@@ -197,6 +198,20 @@ describe('Vocabulary widget boundaries', () => {
     );
     expect(vocabularyWidgetLinks.editWord('word/with space')).toBe(
       'vocabularyvault://word/word%2Fwith%20space/edit',
+    );
+  });
+
+  it('removes values that iOS property lists cannot persist', () => {
+    const propertyListSnapshot = toIosPropertyListWidgetSnapshot(snapshot);
+
+    expect(propertyListSnapshot.preferences.categoryId).toBe('');
+    expect(propertyListSnapshot.words[0]).toEqual(
+      expect.objectContaining({
+        categoryName: '',
+        example: '',
+        partOfSpeech: '',
+        pronunciation: '',
+      }),
     );
   });
 });

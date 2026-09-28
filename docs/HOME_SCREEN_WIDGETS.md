@@ -43,6 +43,8 @@ Preferences remain local and guest-friendly. Whenever words, categories, or widg
 
 Interactive widget buttons require iOS 17 or newer. The Add, Edit, Review, and word links remain regular widget links; iOS 16.4 users can still open those destinations and receive timeline-based word rotation.
 
+iOS does not provide an app-facing API to open the widget picker or install a Home Screen widget. The user must add it from the Home Screen; the app provides those instructions in Settings. Widget gallery previews arrive before a vocabulary timeline exists, so the iOS view also includes a safe empty-state fallback for that first render.
+
 ### Android
 
 `react-native-android-widget` supplies the Android widget receiver and RemoteViews renderer. `index.ts` registers the widget task before Expo Router starts. A separate SQLite key/value database stores the bounded widget snapshot for background updates and **Next** clicks.
