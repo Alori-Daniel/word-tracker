@@ -3,8 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LocalDataProvider, useLocalData } from '@/data';
-import { AiAssistProvider } from '@/features/ai';
-import { AccountProvider, useAccount } from '@/features/auth';
+import { AccountProvider } from '@/features/auth';
 import { DictionaryLookupProvider } from '@/features/dictionary';
 import { ReviewProvider } from '@/features/review';
 import { VocabularyProvider } from '@/features/vocabulary';
@@ -29,20 +28,17 @@ function RootNavigator() {
 
 function ThemedApplication() {
   const { settings, setThemeMode } = useLocalData();
-  const { getAccessToken } = useAccount();
 
   return (
     <AppThemeProvider initialMode={settings.themeMode} onModeChange={setThemeMode}>
       <DictionaryLookupProvider>
-        <AiAssistProvider getAccessToken={getAccessToken}>
-          <VocabularyProvider>
-            <WidgetSyncProvider>
-              <ReviewProvider>
-                <RootNavigator />
-              </ReviewProvider>
-            </WidgetSyncProvider>
-          </VocabularyProvider>
-        </AiAssistProvider>
+        <VocabularyProvider>
+          <WidgetSyncProvider>
+            <ReviewProvider>
+              <RootNavigator />
+            </ReviewProvider>
+          </WidgetSyncProvider>
+        </VocabularyProvider>
       </DictionaryLookupProvider>
     </AppThemeProvider>
   );

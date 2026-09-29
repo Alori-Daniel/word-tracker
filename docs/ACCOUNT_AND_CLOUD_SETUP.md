@@ -26,7 +26,7 @@ Replace the matching local snapshot transactionally
 
 | Part                 | Location                                        | Responsibility                                                                                                           |
 | -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Account state        | `src/features/auth/account-provider.tsx`        | Restores sessions, links guest data, exposes sign-in/sign-out, schedules sync, and supplies the AI gateway access token. |
+| Account state        | `src/features/auth/account-provider.tsx`        | Restores sessions, links guest data, exposes sign-in/sign-out, and schedules cloud sync.                                |
 | Google OAuth         | `src/services/auth/supabase-google-auth.ts`     | Starts Supabase Google OAuth through Expo WebBrowser and exchanges the PKCE callback for a session.                      |
 | Supabase client      | `src/services/supabase/`                        | Creates a lazy client only when valid public configuration exists and persists sessions with Expo SQLite local storage.  |
 | Local migration      | `GuestIdentityRepository.linkAccount`           | Attaches local categories, words, and reviews to the authenticated account in one SQLite transaction.                    |
@@ -119,7 +119,6 @@ Keep `wordecho://auth/callback` available as a browser and web fallback after th
 - Signing out does not delete the on-device vault.
 - The local vault remembers which account owns it, so a different Google account cannot silently claim the previous account's data.
 - A returning account on an empty device restores its cloud categories, words, and reviews.
-- AI requests now receive the current Supabase access token, allowing the gateway to verify premium access later.
 
 ## Production checklist
 

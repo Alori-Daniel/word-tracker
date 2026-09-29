@@ -1,9 +1,6 @@
 import { EMPTY_WORD_FORM_VALUES } from '@/features/vocabulary/word-form-values';
 
-import {
-  applyDictionarySenseToWordForm,
-  toAiDictionaryGrounding,
-} from './apply-dictionary-sense';
+import { applyDictionarySenseToWordForm } from './apply-dictionary-sense';
 
 const selection = {
   lookup: {
@@ -46,15 +43,6 @@ describe('dictionary sense form mapping', () => {
       antonyms: 'lasting',
       personalNotes: 'Remember this.',
       definitionAttribution: selection.lookup.attribution,
-    });
-  });
-
-  it('turns the selected sense into explicit AI grounding', () => {
-    expect(toAiDictionaryGrounding(selection)).toEqual({
-      definition: 'Lasting for a very short time.',
-      partOfSpeech: 'adjective',
-      example: 'The rainbow was ephemeral.',
-      sourceName: 'Free Dictionary API',
     });
   });
 });

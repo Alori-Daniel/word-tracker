@@ -3,7 +3,4 @@ export {
   useDictionaryLookup,
 } from './dictionary-lookup-provider';
 export { DictionaryLookupPanel } from './dictionary-lookup-panel';
-export {
-  applyDictionarySenseToWordForm,
-  toAiDictionaryGrounding,
-} from './apply-dictionary-sense';
+export { applyDictionarySenseToWordForm } from './apply-dictionary-sense';

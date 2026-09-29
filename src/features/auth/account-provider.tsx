@@ -19,7 +19,6 @@ import { getSupabaseClient, isSupabaseConfigured } from '@/services/supabase';
 type AccountContextValue = {
   account: AccountProfile | null;
   errorMessage: string | null;
-  getAccessToken: () => Promise<string | null>;
   isConfigured: boolean;
   isInitializing: boolean;
   isSigningIn: boolean;
@@ -220,12 +219,6 @@ export function AccountProvider({ children }: PropsWithChildren) {
     [],
   );
 
-  const getAccessToken = useCallback(async () => {
-    if (!auth) return null;
-    const { data, error } = await auth.getSession();
-    return error ? null : (data.session?.access_token ?? null);
-  }, [auth]);
-
   const account = useMemo<AccountProfile | null>(() => {
     if (!session) return null;
     const profile = accountProfileFromSession(session);
@@ -239,7 +232,6 @@ export function AccountProvider({ children }: PropsWithChildren) {
     () => ({
       account,
       errorMessage,
-      getAccessToken,
       isConfigured: configured,
       isInitializing,
       isSigningIn,
@@ -249,7 +241,7 @@ export function AccountProvider({ children }: PropsWithChildren) {
       syncNow,
       syncState,
     }),
-    [account, configured, errorMessage, getAccessToken, isInitializing, isSigningIn, queueSync, signInWithGoogle, signOut, syncNow, syncState],
+    [account, configured, errorMessage, isInitializing, isSigningIn, queueSync, signInWithGoogle, signOut, syncNow, syncState],
   );
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
