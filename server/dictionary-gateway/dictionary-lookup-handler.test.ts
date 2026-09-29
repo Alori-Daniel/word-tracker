@@ -3,15 +3,8 @@ import { createDictionaryLookupHandler } from './dictionary-lookup-handler';
 const providerBody = [
   {
     word: 'ephemeral',
-    meanings: [
-      {
-        partOfSpeech: 'adjective',
-        synonyms: [],
-        antonyms: [],
-        definitions: [{ definition: 'Lasting for a very short time.' }],
-      },
-    ],
-    sourceUrls: ['https://en.wiktionary.org/wiki/ephemeral'],
+    tags: ['query', 'adj', 'ipa_pron:ɪfˈɛmɝʌɫ'],
+    defs: ['adj\tLasting for a very short time.'],
   },
 ];
 
@@ -30,9 +23,9 @@ const cachedLookup = {
     },
   ],
   attribution: {
-    providerName: 'Free Dictionary API',
-    providerUrl: 'https://dictionaryapi.dev/',
-    sourceUrl: 'https://en.wiktionary.org/wiki/ephemeral',
+    providerName: 'Datamuse',
+    providerUrl: 'https://www.datamuse.com/api/',
+    sourceUrl: null,
     licenseName: null,
     licenseUrl: null,
   },
@@ -84,11 +77,11 @@ describe('dictionary lookup gateway handler', () => {
       }),
     );
     expect(deps.fetchImpl).toHaveBeenCalledWith(
-      'https://api.dictionaryapi.dev/api/v2/entries/en/ephemeral',
+      'https://api.datamuse.com/words?sp=ephemeral&qe=sp&md=dpr&ipa=1&max=10',
       expect.objectContaining({ method: 'GET' }),
     );
     expect(deps.cache.set).toHaveBeenCalledWith(
-      'en:ephemeral',
+      'datamuse-v1:en:ephemeral',
       expect.objectContaining({ word: 'ephemeral' }),
       86_400,
     );
@@ -124,7 +117,9 @@ describe('dictionary lookup gateway handler', () => {
 
   it('maps provider misses to a stable not-found response', async () => {
     const deps = dependencies({
-      fetchImpl: jest.fn(async () => providerResponse({}, 404)) as typeof fetch,
+      fetchImpl: jest.fn(async () =>
+        providerResponse([{ word: 'unknown', tags: ['query'] }]),
+      ) as typeof fetch,
     });
     const handler = createDictionaryLookupHandler(deps);
     const response = await handler(request());

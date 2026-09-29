@@ -85,7 +85,8 @@
             }
           ]
         }
-      ]
+      ],
+      "./plugins/with-work-manager-compatibility"
     ]
   }
 }

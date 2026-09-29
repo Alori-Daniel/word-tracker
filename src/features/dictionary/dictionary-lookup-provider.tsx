@@ -1,8 +1,13 @@
-import { createContext, type PropsWithChildren, useContext, useMemo } from 'react';
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useMemo,
+} from "react";
 
-import type { DictionaryLookupResult } from '@/domain/dictionary';
-import { DictionaryGatewayClient } from '@/services/dictionary';
-import { configuredGatewayUrl } from '@/services/gateway';
+import type { DictionaryLookupResult } from "@/domain/dictionary";
+import { DictionaryGatewayClient } from "@/services/dictionary";
+import { configuredGatewayUrl } from "@/services/gateway";
 
 type DictionaryLookupContextValue = {
   isConfigured: boolean;
@@ -13,13 +18,17 @@ type DictionaryLookupProviderProps = PropsWithChildren<{
   baseUrl?: string | null;
 }>;
 
-const DictionaryLookupContext = createContext<DictionaryLookupContextValue | null>(null);
+const DictionaryLookupContext =
+  createContext<DictionaryLookupContextValue | null>(null);
 
 export function DictionaryLookupProvider({
   baseUrl = configuredGatewayUrl,
   children,
 }: DictionaryLookupProviderProps) {
-  const client = useMemo(() => new DictionaryGatewayClient({ baseUrl }), [baseUrl]);
+  const client = useMemo(
+    () => new DictionaryGatewayClient({ baseUrl }),
+    [baseUrl],
+  );
   const value = useMemo<DictionaryLookupContextValue>(
     () => ({
       isConfigured: client.isConfigured,
@@ -39,7 +48,9 @@ export function useDictionaryLookup(): DictionaryLookupContextValue {
   const context = useContext(DictionaryLookupContext);
 
   if (!context) {
-    throw new Error('useDictionaryLookup must be used within DictionaryLookupProvider.');
+    throw new Error(
+      "useDictionaryLookup must be used within DictionaryLookupProvider.",
+    );
   }
 
   return context;

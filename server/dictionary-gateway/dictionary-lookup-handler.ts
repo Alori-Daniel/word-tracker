@@ -1,6 +1,6 @@
 import type { DictionaryLookup } from '../../src/domain/dictionary';
 import { parseDictionaryLookup } from '../../src/services/dictionary';
-import { parseFreeDictionaryResponse } from './free-dictionary-parser';
+import { DatamuseEntryNotFoundError, parseDatamuseResponse } from './datamuse-parser';
 
 export type DictionaryLookupRateLimit =
   | { allowed: true }
@@ -20,7 +20,8 @@ export type DictionaryLookupDependencies = {
 };
 
 const CACHE_TTL_SECONDS = 24 * 60 * 60;
-const PROVIDER_BASE_URL = 'https://api.dictionaryapi.dev/api/v2/entries';
+const CACHE_VERSION = 'datamuse-v1';
+const PROVIDER_BASE_URL = 'https://api.datamuse.com/words';
 
 class DictionaryRequestError extends Error {
   constructor(
@@ -91,7 +92,7 @@ function normalizeQuery(url: URL): { cacheKey: string; locale: string; word: str
   }
 
   return {
-    cacheKey: `${locale}:${word.toLocaleLowerCase('en')}`,
+    cacheKey: `${CACHE_VERSION}:${locale}:${word.toLocaleLowerCase('en')}`,
     locale,
     word,
   };
@@ -179,10 +180,17 @@ export function createDictionaryLookupHandler({
         }
       }
 
-      const providerResponse = await fetchImpl(
-        `${PROVIDER_BASE_URL}/${query.locale}/${encodeURIComponent(query.word)}`,
-        { headers: { Accept: 'application/json' }, method: 'GET' },
-      );
+      const providerUrl = new URL(PROVIDER_BASE_URL);
+      providerUrl.searchParams.set('sp', query.word);
+      providerUrl.searchParams.set('qe', 'sp');
+      providerUrl.searchParams.set('md', 'dpr');
+      providerUrl.searchParams.set('ipa', '1');
+      providerUrl.searchParams.set('max', '10');
+
+      const providerResponse = await fetchImpl(providerUrl.toString(), {
+        headers: { Accept: 'application/json' },
+        method: 'GET',
+      });
 
       if (providerResponse.status === 404) {
         throw new DictionaryRequestError(
@@ -208,8 +216,16 @@ export function createDictionaryLookupHandler({
       let lookup: DictionaryLookup;
 
       try {
-        lookup = parseFreeDictionaryResponse(providerBody, query.word);
+        lookup = parseDatamuseResponse(providerBody, query.word);
       } catch (error) {
+        if (error instanceof DatamuseEntryNotFoundError) {
+          throw new DictionaryRequestError(
+            404,
+            'not_found',
+            'No dictionary entry was found for this word.',
+          );
+        }
+
         logger.warn('Dictionary provider returned an invalid response.', {
           error,
           gatewayRequestId: requestId,

@@ -1,24 +1,27 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useState } from "react";
+import { Pressable, View } from "react-native";
 
-import { AppButton, AppText } from '@/components/ui';
+import { AppButton, AppText } from "@/components/ui";
 import type {
   DictionaryLookup,
   DictionarySense,
   DictionarySenseSelection,
-} from '@/domain/dictionary';
-import { DictionaryGatewayError } from '@/services/dictionary';
-import { createThemedStyles, useAppTheme } from '@/theme';
+} from "@/domain/dictionary";
+import { DictionaryGatewayError } from "@/services/dictionary";
+import { createThemedStyles, useAppTheme } from "@/theme";
 
-import { useDictionaryLookup } from './dictionary-lookup-provider';
+import { useDictionaryLookup } from "./dictionary-lookup-provider";
 
 type DictionaryLookupPanelProps = {
   onSelect: (selection: DictionarySenseSelection) => void;
   word: string;
 };
 
-export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelProps) {
+export function DictionaryLookupPanel({
+  onSelect,
+  word,
+}: DictionaryLookupPanelProps) {
   const styles = useStyles();
   const { theme } = useAppTheme();
   const { isConfigured, lookupWord } = useDictionaryLookup();
@@ -40,7 +43,7 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
       setErrorMessage(
         error instanceof DictionaryGatewayError
           ? error.message
-          : 'Dictionary lookup is temporarily unavailable. Please try again.',
+          : "Dictionary lookup is temporarily unavailable. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -57,7 +60,11 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
     <View style={styles.container}>
       <View style={styles.headingRow}>
         <View style={styles.iconContainer}>
-          <MaterialIcons color={theme.colors.brand.primary} name="menu-book" size={20} />
+          <MaterialIcons
+            color={theme.colors.brand.primary}
+            name="menu-book"
+            size={20}
+          />
         </View>
         <View style={styles.headingCopy}>
           <View style={styles.titleRow}>
@@ -84,7 +91,11 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
         disabled={!isConfigured}
         label="Look up word"
         leftAccessory={
-          <MaterialIcons color={theme.colors.brand.primary} name="search" size={19} />
+          <MaterialIcons
+            color={theme.colors.brand.primary}
+            name="search"
+            size={19}
+          />
         }
         loading={isLoading}
         onPress={() => void runLookup()}
@@ -92,7 +103,11 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
       />
 
       {errorMessage ? (
-        <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
+        <AppText
+          accessibilityRole="alert"
+          style={styles.errorText}
+          variant="caption"
+        >
           {errorMessage}
         </AppText>
       ) : null}
@@ -145,7 +160,7 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
                   </AppText>
                 ) : null}
                 <AppText style={styles.useMeaning} variant="label">
-                  {isSelected ? 'Meaning selected' : 'Use this meaning'}
+                  {isSelected ? "Meaning selected" : "Use this meaning"}
                 </AppText>
               </Pressable>
             );
@@ -155,7 +170,7 @@ export function DictionaryLookupPanel({ onSelect, word }: DictionaryLookupPanelP
             Source: {lookup.attribution.providerName}
             {lookup.attribution.licenseName
               ? ` · ${lookup.attribution.licenseName}`
-              : ''}
+              : ""}
           </AppText>
         </View>
       ) : null}
@@ -171,16 +186,16 @@ const useStyles = createThemedStyles((theme) => ({
     paddingTop: theme.spacing.md,
   },
   headingRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
+    alignItems: "flex-start",
+    flexDirection: "row",
     gap: theme.spacing.sm,
   },
   iconContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: theme.colors.brand.soft,
     borderRadius: theme.radius.md,
     height: 40,
-    justifyContent: 'center',
+    justifyContent: "center",
     width: 40,
   },
   headingCopy: {
@@ -188,9 +203,9 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.xxs,
   },
   titleRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.xs,
   },
   freeBadge: {
@@ -227,13 +242,13 @@ const useStyles = createThemedStyles((theme) => ({
     opacity: 0.82,
   },
   senseHeading: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   partOfSpeech: {
     color: theme.colors.brand.primary,
-    textTransform: 'capitalize',
+    textTransform: "capitalize",
   },
   useMeaning: {
     color: theme.colors.brand.primary,

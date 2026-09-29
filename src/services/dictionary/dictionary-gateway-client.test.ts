@@ -85,4 +85,26 @@ describe('DictionaryGatewayClient', () => {
       retryAfterSeconds: null,
     });
   });
+
+  it('reports a timeout when the configured request deadline is reached', async () => {
+    const fetchImpl = jest.fn(
+      (_url: string | URL | Request, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            const error = new Error('Aborted');
+            error.name = 'AbortError';
+            reject(error);
+          });
+        }),
+    );
+    const client = new DictionaryGatewayClient({
+      baseUrl: 'https://gateway.example.com',
+      fetchImpl: fetchImpl as typeof fetch,
+      timeoutMs: 1,
+    });
+
+    await expect(client.lookupWord('ephemeral')).rejects.toMatchObject({
+      code: 'timeout',
+    });
+  });
 });

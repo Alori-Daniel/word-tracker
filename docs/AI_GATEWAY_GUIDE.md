@@ -41,6 +41,8 @@ The gateway is necessary because an installed mobile app cannot keep a secret. E
 | Mobile dictionary client | `src/services/dictionary/` | Calls the shared gateway, applies a timeout, maps safe errors, and rejects malformed responses. |
 | Dictionary form workflow | `src/features/dictionary/` | Shows possible meanings and only fills fields after the user explicitly selects one. |
 | Dictionary reference handler | `server/dictionary-gateway/` | Applies cache and anonymous rate-limit hooks, calls the replaceable provider, and normalizes its response. |
+| Deployable dictionary function | `supabase/functions/wordecho-gateway/` | Implements the public Supabase route, private cache, salted anonymous rate limiting, and provider adapter. |
+| Dictionary deployment guide | `docs/DICTIONARY_GATEWAY_DEPLOYMENT.md` | Gives the dashboard-only SQL, secret, deployment, and testing steps. |
 | Shared AI types | `src/domain/ai.ts` | Defines the request, optional dictionary grounding, generated fields, metadata, and known errors. |
 | Mobile gateway client | `src/services/ai/` | Calls only our gateway, attaches a future account token, applies a timeout, maps safe errors, and rejects malformed responses. |
 | AI form workflow | `src/features/ai/` | Lets a user generate, preview, and explicitly apply suggestions. It never saves or overwrites fields automatically. |
@@ -53,7 +55,7 @@ The reference handler uses Structured Outputs through `text.format` so the model
 
 The quick-add card keeps only **Word** and **Meaning** required. After entering a word, the user can choose between two helpers:
 
-- **Look up word — Free:** returns dictionary meanings. The user chooses the intended sense; the app never silently picks the first one. That choice can prefill meaning, pronunciation, part of speech, example, synonyms, and antonyms.
+- **Look up word — Free:** returns dictionary meanings. The user chooses the intended sense; the app never silently picks the first one. Datamuse currently prefills meaning, IPA pronunciation, and part of speech. The contract keeps example, synonym, and antonym fields optional for future providers.
 - **Prefill with AI — Premium:** returns a learner-friendly draft for explicit review and application.
 
 When a dictionary sense has been selected, that exact definition and part of speech are sent to AI as a factual anchor. AI can simplify or personalize it, but the gateway prompt tells it not to switch to or contradict another meaning.
@@ -73,15 +75,21 @@ AI content is deliberately presented as a draft, with a reminder that it can be 
 
 ## What is connected now—and what is not
 
-The code boundaries are implemented and testable, but no live gateway is deployed from this repository. A live connection requires infrastructure and credentials that should not be guessed or committed here:
+The dictionary gateway is ready to deploy from the Supabase Dashboard without
+the CLI. Follow `docs/DICTIONARY_GATEWAY_DEPLOYMENT.md`; the deployment itself
+still has to be completed in the project's Supabase Dashboard. Premium AI remains
+intentionally disabled until its account and billing controls are ready. It requires:
 
-- a deployed HTTPS gateway URL;
 - a configured Supabase project so the implemented Google sign-in flow can issue an account token;
 - a server-side subscription and quota check;
 - an OpenAI project API key stored in the gateway's secret manager;
 - a server-selected model that supports Structured Outputs.
 
-Until `EXPO_PUBLIC_GATEWAY_URL` is configured, both helpers show a disabled state. Once deployed, free dictionary lookup is intentionally anonymous but must have cache and rate-limit implementations. AI remains fail-closed: before account authentication is connected, its handler returns “Sign in to use AI assistance.”
+Until `EXPO_PUBLIC_GATEWAY_URL` is configured, both helpers show a disabled state.
+This repository now configures it for the WordEcho Supabase function and includes
+the dictionary cache and rate limit. The URL starts working after you complete the
+dashboard deployment. AI remains fail-closed: before account authentication is
+connected, its handler returns “Sign in to use AI assistance.”
 
 ## Recommended production deployment
 
@@ -106,7 +114,7 @@ The handler is framework-independent and uses standard `Request`, `Response`, an
 Copy the root example file to `.env.local` and set only the gateway URL:
 
 ```dotenv
-EXPO_PUBLIC_GATEWAY_URL=https://your-gateway.example.com
+EXPO_PUBLIC_GATEWAY_URL=https://YOUR_PROJECT_REF.supabase.co/functions/v1/wordecho-gateway
 ```
 
 This value is public. Its only job is to tell the app where our server lives. The older `EXPO_PUBLIC_AI_GATEWAY_URL` name is temporarily accepted for compatibility, but new environments should use the shared name.
@@ -131,7 +139,7 @@ The repository ignores real `.env` files and commits only blank/example configur
 
 ## Dictionary API contract
 
-The app sends `GET /v1/dictionary/lookup?word=ephemeral&locale=en`. The initial provider adapter uses [Free Dictionary API](https://dictionaryapi.dev/), but provider-specific fields never leak into the mobile contract, so the provider can be replaced later.
+The app sends `GET /v1/dictionary/lookup?word=ephemeral&locale=en`. The provider adapter uses the [Datamuse API](https://www.datamuse.com/api/) for definitions, parts of speech, and IPA pronunciation. Provider-specific fields never leak into the mobile contract, so the provider can be replaced later.
 
 The gateway returns one or more meanings and their attribution:
 
@@ -139,24 +147,24 @@ The gateway returns one or more meanings and their attribution:
 {
   "data": {
     "word": "ephemeral",
-    "pronunciation": "/ɪˈfɛmərəl/",
+    "pronunciation": "/ɪfˈɛmɝʌɫ/",
     "audioUrl": null,
     "senses": [
       {
         "id": "0-0-0",
-        "definition": "Lasting for a very short time.",
+        "definition": "Lasting for a short period of time.",
         "partOfSpeech": "adjective",
-        "example": "The rainbow was ephemeral.",
-        "synonyms": ["brief", "fleeting"],
-        "antonyms": ["lasting"]
+        "example": null,
+        "synonyms": [],
+        "antonyms": []
       }
     ],
     "attribution": {
-      "providerName": "Free Dictionary API",
-      "providerUrl": "https://dictionaryapi.dev/",
-      "sourceUrl": "https://en.wiktionary.org/wiki/ephemeral",
-      "licenseName": "CC BY-SA 3.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+      "providerName": "Datamuse",
+      "providerUrl": "https://www.datamuse.com/api/",
+      "sourceUrl": null,
+      "licenseName": null,
+      "licenseUrl": null
     }
   },
   "meta": { "requestId": "gateway-request-id", "cached": false }
@@ -175,10 +183,10 @@ The app sends `POST /v1/word-assist` to the gateway:
   "word": "ephemeral",
   "context": "The beauty of the sunset was ephemeral.",
   "dictionaryGrounding": {
-    "definition": "Lasting for a very short time.",
+    "definition": "Lasting for a short period of time.",
     "partOfSpeech": "adjective",
-    "example": "The rainbow was ephemeral.",
-    "sourceName": "Free Dictionary API"
+    "example": null,
+    "sourceName": "Datamuse"
   },
   "existingDefinition": null,
   "locale": "en"
