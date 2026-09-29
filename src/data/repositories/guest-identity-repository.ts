@@ -140,6 +140,16 @@ export class GuestIdentityRepository {
           $localUserId: current.localUserId,
         },
       );
+
+      await this.database.runAsync(
+        `UPDATE feature_usage_events
+         SET user_id = $userId, sync_status = 'pending'
+         WHERE local_user_id = $localUserId`,
+        {
+          $userId: account.userId,
+          $localUserId: current.localUserId,
+        },
+      );
     });
 
     const linked = await this.get();

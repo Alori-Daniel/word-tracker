@@ -71,10 +71,14 @@ describe('GuestIdentityRepository', () => {
     ).resolves.toEqual(expect.objectContaining({ linkedUserId: 'user-1' }));
 
     expect(withTransactionAsync).toHaveBeenCalledTimes(1);
-    expect(runAsync).toHaveBeenCalledTimes(5);
+    expect(runAsync).toHaveBeenCalledTimes(6);
     expect(runAsync).toHaveBeenCalledWith(
       expect.stringContaining("sync_status = 'pending'"),
       expect.objectContaining({ $userId: 'user-1' }),
+    );
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE feature_usage_events'),
+      expect.objectContaining({ $localUserId: 'local-id', $userId: 'user-1' }),
     );
   });
 });

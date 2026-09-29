@@ -36,4 +36,14 @@ describe('database migrations', () => {
       expect(attributionMigration).toContain(`ADD COLUMN ${column} TEXT`);
     }
   });
+
+  it('records CSV usage as idempotent, owned events', () => {
+    const usageMigration = databaseMigrations[2].sql;
+
+    expect(usageMigration).toContain('CREATE TABLE feature_usage_events');
+    expect(usageMigration).toContain("feature_key IN ('csv_import')");
+    expect(usageMigration).toContain('id TEXT PRIMARY KEY');
+    expect(usageMigration).toContain('local_user_id TEXT NOT NULL');
+    expect(usageMigration).toContain("sync_status IN ('local', 'pending', 'synced', 'error')");
+  });
 });

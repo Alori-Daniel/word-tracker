@@ -155,9 +155,34 @@ const addDefinitionAttribution: DatabaseMigration = {
   `,
 };
 
+const addFeatureUsageEvents: DatabaseMigration = {
+  version: 3,
+  name: 'add_feature_usage_events',
+  sql: `
+    CREATE TABLE feature_usage_events (
+      id TEXT PRIMARY KEY NOT NULL,
+      feature_key TEXT NOT NULL CHECK (feature_key IN ('csv_import')),
+      user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+      local_user_id TEXT NOT NULL REFERENCES local_identity(local_user_id) ON DELETE CASCADE,
+      occurred_at TEXT NOT NULL,
+      sync_status TEXT NOT NULL DEFAULT 'local'
+        CHECK (sync_status IN ('local', 'pending', 'synced', 'error')),
+      CHECK (user_id IS NOT NULL OR local_user_id IS NOT NULL)
+    );
+
+    CREATE INDEX feature_usage_owner_index
+      ON feature_usage_events(local_user_id, feature_key, occurred_at);
+
+    CREATE INDEX feature_usage_account_sync_index
+      ON feature_usage_events(user_id, sync_status, occurred_at)
+      WHERE user_id IS NOT NULL;
+  `,
+};
+
 export const databaseMigrations = [
   createInitialSchema,
   addDefinitionAttribution,
+  addFeatureUsageEvents,
 ] as const satisfies readonly DatabaseMigration[];
 
 export const DATABASE_VERSION = databaseMigrations[databaseMigrations.length - 1]?.version ?? 0;

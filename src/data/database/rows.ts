@@ -70,6 +70,15 @@ export type ReviewHistoryRow = ReviewRow & {
   word: string;
 };
 
+export type FeatureUsageEventRow = {
+  id: string;
+  feature_key: 'csv_import';
+  user_id: string | null;
+  local_user_id: string;
+  occurred_at: string;
+  sync_status: string;
+};
+
 export type SettingRow = {
   setting_key: string;
   value_json: string;
