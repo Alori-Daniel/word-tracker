@@ -1,8 +1,8 @@
 # WordEcho subscriptions and CSV allowances
 
-This document defines the approved freemium model and the server boundaries for
-the payment implementation. Stage 1 adds only policy, types, and data storage;
-it does not install a billing SDK or show a paywall.
+This document defines the approved freemium model, billing integration, and
+server boundaries. The RevenueCat SDK and subscription state provider are now
+connected; the paywall and purchase controls belong to the next stage.
 
 ## Product model
 
@@ -99,6 +99,59 @@ The detailed provider lifecycle is stored separately in `billing_customers`.
 Cancellation does not immediately remove access: a cancelled subscription
 normally stays active through its current expiration date.
 
+## Mobile SDK integration
+
+The app uses `react-native-purchases` and configures it once near the root of
+the provider tree. The subscription provider:
+
+- starts with an anonymous RevenueCat customer for guest mode;
+- calls `Purchases.logIn` with the Supabase user UUID after Google sign-in;
+- returns to a new anonymous customer after account sign-out;
+- listens for CustomerInfo changes from purchases, renewals, and restores;
+- maps the `premium` entitlement into WordEcho's free, trialing, Premium, or
+  expired access states; and
+- stays safely disabled when the current platform key is missing.
+
+Configuration uses only public, platform-specific SDK keys:
+
+```dotenv
+EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=appl_your_public_sdk_key
+EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_your_public_sdk_key
+```
+
+These keys identify the RevenueCat app and are expected in a mobile bundle. A
+RevenueCat secret key must never use an `EXPO_PUBLIC_*` variable.
+
+## RevenueCat dashboard preparation
+
+Before the paywall stage:
+
+1. Create one RevenueCat project for WordEcho.
+2. Add an Apple app with bundle ID `com.danori.wordecho`.
+3. Add a Google Play app with package name `com.danori.wordecho`.
+4. Create the `premium` entitlement.
+5. Create or import `wordecho_premium_monthly` and
+   `wordecho_premium_annual` from their respective stores.
+6. Attach both products to `premium` and add monthly and annual packages to the
+   default offering.
+7. Copy each app's public SDK key into `.env.local` using the variable names
+   above, then restart Metro.
+
+Store products must exist in App Store Connect and Google Play Console before
+real product details or purchases can load. The seven-day introductory offer is
+configured on those store products rather than granted by JavaScript.
+
+`react-native-purchases` contains native code. Expo Go can preview parts of the
+integration, but real transactions require a new development build:
+
+```bash
+npx eas-cli@latest build --profile development --platform ios
+npx eas-cli@latest build --profile development --platform android
+```
+
+No manual `ios/` or `android/` edits are required; Expo's generated native
+projects autolink the SDK during the build.
+
 ## CSV allowance accounting
 
 The allowance uses immutable usage events rather than a client-editable counter.
@@ -133,12 +186,11 @@ future account migration.
 
 ## Next implementation stages
 
-1. Install and configure the RevenueCat Expo SDK using public platform API keys.
-2. Add the subscription provider and anonymous-to-Supabase identity transition.
-3. Build the paywall, trial messaging, restore, and subscription-management UI.
-4. Implement CSV validation, preview, import, export, and allowance reservation.
-5. Deploy the authenticated RevenueCat webhook and synchronize server state.
-6. Test sandbox purchases, restores, cancellation, expiration, billing issues,
+1. Build the paywall, trial messaging, purchase, restore, and
+   subscription-management UI.
+2. Implement CSV validation, preview, import, export, and allowance reservation.
+3. Deploy the authenticated RevenueCat webhook and synchronize server state.
+4. Test sandbox purchases, restores, cancellation, expiration, billing issues,
    grace periods, account switching, and guest-to-account migration.
 
 References:

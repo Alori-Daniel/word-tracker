@@ -6,6 +6,7 @@ import { LocalDataProvider, useLocalData } from '@/data';
 import { AccountProvider } from '@/features/auth';
 import { DictionaryLookupProvider } from '@/features/dictionary';
 import { ReviewProvider } from '@/features/review';
+import { SubscriptionProvider } from '@/features/subscriptions';
 import { VocabularyProvider } from '@/features/vocabulary';
 import { WidgetSyncProvider } from '@/features/widgets';
 import { AppThemeProvider, useAppTheme } from '@/theme';
@@ -49,7 +50,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <LocalDataProvider>
         <AccountProvider>
-          <ThemedApplication />
+          <SubscriptionProvider>
+            <ThemedApplication />
+          </SubscriptionProvider>
         </AccountProvider>
       </LocalDataProvider>
     </SafeAreaProvider>
