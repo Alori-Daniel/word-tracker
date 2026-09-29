@@ -1,8 +1,8 @@
 # WordEcho subscriptions and CSV allowances
 
 This document defines the approved freemium model, billing integration, and
-server boundaries. The RevenueCat SDK and subscription state provider are now
-connected; the paywall and purchase controls belong to the next stage.
+server boundaries. The RevenueCat SDK, subscription state provider, and custom
+WordEcho paywall are now connected.
 
 ## Product model
 
@@ -117,6 +117,8 @@ Configuration uses only public, platform-specific SDK keys:
 ```dotenv
 EXPO_PUBLIC_REVENUECAT_IOS_API_KEY=appl_your_public_sdk_key
 EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_your_public_sdk_key
+EXPO_PUBLIC_TERMS_URL=https://your-domain.example/terms
+EXPO_PUBLIC_PRIVACY_URL=https://your-domain.example/privacy
 ```
 
 These keys identify the RevenueCat app and are expected in a mobile bundle. A
@@ -140,6 +142,28 @@ Before the paywall stage:
 Store products must exist in App Store Connect and Google Play Console before
 real product details or purchases can load. The seven-day introductory offer is
 configured on those store products rather than granted by JavaScript.
+
+## Paywall and purchase controls
+
+Settings now links to a custom WordEcho Premium screen. It loads localized
+monthly and annual prices from the current RevenueCat offering and supports:
+
+- monthly and annual plan selection;
+- an annual savings comparison when the annual store price is lower;
+- a purchase through the native App Store or Google Play sheet;
+- user-initiated purchase restoration;
+- immediate entitlement refresh after purchase or restoration; and
+- the store-provided subscription-management page for active subscribers.
+
+Trial messaging is derived from store metadata and eligibility. On iOS the app
+uses RevenueCat's introductory-offer eligibility result. On Android it checks
+the eligible Google Play subscription option for a free pricing phase. If the
+app cannot prove eligibility, it displays the full recurring price and does not
+promise a free trial. The store purchase sheet remains the final authority.
+
+The Terms of Use and Privacy Policy variables must point to real public pages
+before store submission. The paywall deliberately reports missing links in
+development instead of shipping placeholder destinations.
 
 `react-native-purchases` contains native code. Expo Go can preview parts of the
 integration, but real transactions require a new development build:
@@ -186,11 +210,9 @@ future account migration.
 
 ## Next implementation stages
 
-1. Build the paywall, trial messaging, purchase, restore, and
-   subscription-management UI.
-2. Implement CSV validation, preview, import, export, and allowance reservation.
-3. Deploy the authenticated RevenueCat webhook and synchronize server state.
-4. Test sandbox purchases, restores, cancellation, expiration, billing issues,
+1. Implement CSV validation, preview, import, export, and allowance reservation.
+2. Deploy the authenticated RevenueCat webhook and synchronize server state.
+3. Test sandbox purchases, restores, cancellation, expiration, billing issues,
    grace periods, account switching, and guest-to-account migration.
 
 References:

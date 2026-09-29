@@ -2,6 +2,9 @@ import Purchases, {
   LOG_LEVEL,
   type CustomerInfo,
   type CustomerInfoUpdateListener,
+  type IntroEligibility,
+  type PurchasesOffering,
+  type PurchasesPackage,
 } from 'react-native-purchases';
 
 export class RevenueCatClient {
@@ -41,6 +44,22 @@ export class RevenueCatClient {
 
   refresh(): Promise<CustomerInfo> {
     return Purchases.getCustomerInfo();
+  }
+
+  async getCurrentOffering(): Promise<PurchasesOffering | null> {
+    return (await Purchases.getOfferings()).current;
+  }
+
+  checkTrialEligibility(productIdentifiers: string[]): Promise<Record<string, IntroEligibility>> {
+    return Purchases.checkTrialOrIntroductoryPriceEligibility(productIdentifiers);
+  }
+
+  async purchasePackage(item: PurchasesPackage): Promise<CustomerInfo> {
+    return (await Purchases.purchasePackage(item)).customerInfo;
+  }
+
+  restorePurchases(): Promise<CustomerInfo> {
+    return Purchases.restorePurchases();
   }
 
   getAppUserId(): Promise<string> {

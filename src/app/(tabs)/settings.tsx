@@ -13,6 +13,7 @@ import {
 } from '@/components/ui';
 import { useLocalData } from '@/data';
 import { GoogleSignInButton, useAccount } from '@/features/auth';
+import { useSubscription } from '@/features/subscriptions';
 import { useVocabulary } from '@/features/vocabulary';
 import { WidgetSettingsCard } from '@/features/widgets';
 import { createThemedStyles, useAppTheme } from '@/theme';
@@ -35,6 +36,7 @@ export default function SettingsScreen() {
     syncNow,
     syncState,
   } = useAccount();
+  const { subscription } = useSubscription();
   const { categories, wordCount } = useVocabulary();
   const [isReplayingWelcome, setIsReplayingWelcome] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -86,7 +88,13 @@ export default function SettingsScreen() {
               </View>
               <View style={styles.localBadge}>
                 <AppText style={styles.localBadgeText} variant="caption">
-                  {account ? account.subscriptionStatus.toUpperCase() : 'LOCAL'}
+                  {subscription.isPremium
+                    ? subscription.isTrial
+                      ? 'TRIAL'
+                      : 'PREMIUM'
+                    : account
+                      ? 'FREE'
+                      : 'LOCAL'}
                 </AppText>
               </View>
             </View>
@@ -160,6 +168,40 @@ export default function SettingsScreen() {
                 {accountError}
               </AppText>
             ) : null}
+          </Card>
+        </View>
+
+        <View style={styles.section}>
+          <AppText variant="subtitle">Premium</AppText>
+          <Card style={styles.card}>
+            <View style={styles.premiumHeading}>
+              <View style={styles.premiumIcon}>
+                <MaterialIcons
+                  color={theme.colors.brand.primary}
+                  name="workspace-premium"
+                  size={26}
+                />
+              </View>
+              <View style={styles.accountCopy}>
+                <AppText variant="label">
+                  {subscription.isPremium
+                    ? subscription.isTrial
+                      ? 'Premium trial'
+                      : 'WordEcho Premium'
+                    : 'Unlock more from your vault'}
+                </AppText>
+                <AppText tone="secondary" variant="caption">
+                  {subscription.isPremium
+                    ? 'Manage your plan, renewal, and store subscription.'
+                    : 'Unlimited imports, advanced widgets, analytics, and cloud history.'}
+                </AppText>
+              </View>
+            </View>
+            <AppButton
+              label={subscription.isPremium ? 'Manage Premium' : 'Explore Premium'}
+              onPress={() => router.push('/subscription')}
+              variant={subscription.isPremium ? 'secondary' : 'primary'}
+            />
           </Card>
         </View>
 
@@ -251,6 +293,19 @@ const useStyles = createThemedStyles((theme) => ({
   accountCopy: {
     flex: 1,
     gap: theme.spacing.xxs,
+  },
+  premiumHeading: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+  },
+  premiumIcon: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.brand.soft,
+    borderRadius: theme.radius.md,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
   },
   localBadge: {
     backgroundColor: theme.colors.background.muted,
