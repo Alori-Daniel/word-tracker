@@ -123,6 +123,23 @@ describe('WordRepository', () => {
     );
   });
 
+  it('lists distinct local calendar dates used by the addition streak', async () => {
+    const getAllAsync = jest.fn(async () => [
+      { date: '2026-09-30' },
+      { date: '2026-09-29' },
+    ]);
+    const repository = createRepository({ getAllAsync } as unknown as SQLiteDatabase);
+
+    await expect(repository.listAdditionDates()).resolves.toEqual([
+      '2026-09-30',
+      '2026-09-29',
+    ]);
+    expect(getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining("date(created_at, 'localtime')"),
+      expect.objectContaining({ $localUserId: 'guest-1' }),
+    );
+  });
+
   it('updates editable fields while preserving guest ownership', async () => {
     const updatedRow: WordRow = {
       ...wordRow,

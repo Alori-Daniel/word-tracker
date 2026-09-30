@@ -6,7 +6,6 @@ import { Alert, ScrollView, View } from 'react-native';
 import {
   AppButton,
   AppText,
-  Card,
   Screen,
   ThemeModeSelector,
 } from '@/components/ui';
@@ -70,7 +69,7 @@ export default function SettingsScreen() {
 
         <View style={styles.section}>
           <SectionTitle>Account</SectionTitle>
-          <Card style={styles.card}>
+          <View style={styles.card}>
             <View style={styles.accountHeading}>
               <View style={styles.accountAvatar}>
                 <MaterialIcons color={theme.colors.brand.primary} name="person" size={26} />
@@ -167,12 +166,12 @@ export default function SettingsScreen() {
                 {accountError}
               </AppText>
             ) : null}
-          </Card>
+          </View>
         </View>
 
         <View style={styles.section}>
           <SectionTitle>Premium</SectionTitle>
-          <Card style={styles.card}>
+          <View style={styles.card}>
             <View style={styles.premiumHeading}>
               <View style={styles.premiumIcon}>
                 <MaterialIcons
@@ -201,12 +200,12 @@ export default function SettingsScreen() {
               onPress={() => router.push('/subscription')}
               variant={subscription.isPremium ? 'secondary' : 'primary'}
             />
-          </Card>
+          </View>
         </View>
 
         <View style={styles.section}>
           <SectionTitle>Appearance</SectionTitle>
-          <Card style={styles.card}>
+          <View style={styles.card}>
             <View style={styles.settingCopy}>
               <AppText variant="label">Color mode</AppText>
               <AppText tone="secondary" variant="caption">
@@ -214,7 +213,7 @@ export default function SettingsScreen() {
               </AppText>
             </View>
             <ThemeModeSelector />
-          </Card>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -224,7 +223,7 @@ export default function SettingsScreen() {
 
         <View style={styles.section}>
           <SectionTitle>Local vault</SectionTitle>
-          <Card style={styles.card}>
+          <View style={styles.card}>
             <View style={styles.dataRow}>
               <AppText tone="secondary">Saved words</AppText>
               <AppText variant="label">{wordCount}</AppText>
@@ -238,7 +237,7 @@ export default function SettingsScreen() {
               onPress={() => router.push('/categories')}
               variant="secondary"
             />
-          </Card>
+          </View>
         </View>
 
         <AppButton
@@ -283,7 +282,11 @@ const useStyles = createThemedStyles((theme) => ({
     paddingLeft: theme.spacing.xs,
   },
   card: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xs,
+    paddingTop: theme.spacing.lg,
   },
   accountHeading: {
     alignItems: 'center',
@@ -292,8 +295,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   accountAvatar: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.pill,
     height: 48,
     justifyContent: 'center',
     width: 48,
@@ -309,15 +310,13 @@ const useStyles = createThemedStyles((theme) => ({
   },
   premiumIcon: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.md,
     height: 48,
     justifyContent: 'center',
     width: 48,
   },
   localBadge: {
-    backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.pill,
+    borderBottomColor: theme.colors.border.default,
+    borderBottomWidth: 1,
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: theme.spacing.xs,
   },

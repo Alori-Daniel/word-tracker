@@ -9,6 +9,11 @@ import {
 } from 'react';
 
 import { useLocalData } from '@/data';
+import {
+  calculateWordAdditionStreak,
+  EMPTY_WORD_ADDITION_STREAK,
+  type WordAdditionStreak,
+} from '@/domain/word-addition-streak';
 import type {
   Category,
   CreateWordInput,
@@ -38,6 +43,7 @@ type VocabularyContextValue = {
   revision: number;
   updateWord: (id: string, input: UpdateWordInput) => Promise<VocabularyWord | null>;
   wordCount: number;
+  wordAdditionStreak: WordAdditionStreak;
 };
 
 const VocabularyContext = createContext<VocabularyContextValue | null>(null);
@@ -48,6 +54,7 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentWords, setRecentWords] = useState<VocabularyWord[]>([]);
   const [wordCount, setWordCount] = useState(0);
+  const [wordAdditionStreak, setWordAdditionStreak] = useState(EMPTY_WORD_ADDITION_STREAK);
   const [revision, setRevision] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -56,15 +63,17 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
     setError(null);
 
     try {
-      const [nextCategories, nextRecentWords, nextWordCount] = await Promise.all([
+      const [nextCategories, nextRecentWords, nextWordCount, additionDates] = await Promise.all([
         repositories.categories.list(),
         repositories.words.list({ limit: 5 }),
         repositories.words.count(),
+        repositories.words.listAdditionDates(),
       ]);
 
       setCategories(nextCategories);
       setRecentWords(nextRecentWords);
       setWordCount(nextWordCount);
+      setWordAdditionStreak(calculateWordAdditionStreak(additionDates));
       setRevision((value) => value + 1);
     } catch (nextError) {
       setError(
@@ -155,6 +164,7 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
       revision,
       updateWord,
       wordCount,
+      wordAdditionStreak,
     }),
     [
       categories,
@@ -171,6 +181,7 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
       revision,
       updateWord,
       wordCount,
+      wordAdditionStreak,
     ],
   );
 

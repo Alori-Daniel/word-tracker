@@ -33,7 +33,7 @@ export function ThemeModeSelector() {
           >
             <AppText
               style={isSelected && styles.optionTextSelected}
-              tone={isSelected ? 'inverse' : 'secondary'}
+              tone={isSelected ? 'primary' : 'secondary'}
               variant="label"
             >
               {option.label}
@@ -47,26 +47,27 @@ export function ThemeModeSelector() {
 
 const useStyles = createThemedStyles((theme) => ({
   container: {
-    backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.pill,
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
     flexDirection: 'row',
     padding: theme.spacing.xxs,
   },
   option: {
     alignItems: 'center',
-    borderRadius: theme.radius.pill,
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
     flex: 1,
     minHeight: 40,
     justifyContent: 'center',
     paddingHorizontal: theme.spacing.sm,
   },
   optionSelected: {
-    backgroundColor: theme.colors.brand.primary,
+    borderBottomColor: theme.colors.brand.primary,
   },
   optionPressed: {
     opacity: 0.8,
   },
   optionTextSelected: {
-    color: theme.colors.brand.onPrimary,
+    color: theme.colors.brand.primary,
   },
 }));

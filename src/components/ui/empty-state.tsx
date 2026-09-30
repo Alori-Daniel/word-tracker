@@ -6,7 +6,6 @@ import { createThemedStyles, useAppTheme } from '@/theme';
 
 import { AppButton } from './app-button';
 import { AppText } from './app-text';
-import { Card } from './card';
 
 type EmptyStateProps = {
   actionLabel?: string;
@@ -21,7 +20,7 @@ export function EmptyState({ actionLabel, description, icon, onAction, title }: 
   const { theme } = useAppTheme();
 
   return (
-    <Card style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.iconContainer}>
         <MaterialIcons color={theme.colors.brand.primary} name={icon} size={30} />
       </View>
@@ -36,7 +35,7 @@ export function EmptyState({ actionLabel, description, icon, onAction, title }: 
           <AppButton label={actionLabel} onPress={onAction} />
         </View>
       ) : null}
-    </Card>
+    </View>
   );
 }
 
@@ -49,8 +48,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   iconContainer: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.pill,
     height: 64,
     justifyContent: 'center',
     width: 64,

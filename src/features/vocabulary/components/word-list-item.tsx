@@ -67,10 +67,11 @@ export function WordListItem({ category, onPress, word }: WordListItemProps) {
 
 const useStyles = createThemedStyles((theme) => ({
   card: {
-    backgroundColor: theme.colors.background.surface,
-    borderRadius: theme.radius.xl,
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
     gap: theme.spacing.sm,
-    padding: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: theme.spacing.lg,
   },
   pressed: {
     opacity: 0.72,
@@ -101,24 +102,23 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.sm,
   },
   status: {
-    borderRadius: theme.radius.pill,
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xxs,
+    borderBottomWidth: 1,
+    paddingBottom: theme.spacing.xxs,
   },
   learning: {
-    backgroundColor: theme.colors.learningStatus.learning.background,
+    borderBottomColor: theme.colors.learningStatus.learning.foreground,
   },
   learningText: {
     color: theme.colors.learningStatus.learning.foreground,
   },
   familiar: {
-    backgroundColor: theme.colors.learningStatus.familiar.background,
+    borderBottomColor: theme.colors.learningStatus.familiar.foreground,
   },
   familiarText: {
     color: theme.colors.learningStatus.familiar.foreground,
   },
   mastered: {
-    backgroundColor: theme.colors.learningStatus.mastered.background,
+    borderBottomColor: theme.colors.learningStatus.mastered.foreground,
   },
   masteredText: {
     color: theme.colors.learningStatus.mastered.foreground,

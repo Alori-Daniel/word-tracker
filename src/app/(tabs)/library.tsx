@@ -259,8 +259,8 @@ const useStyles = createThemedStyles((theme) => ({
   },
   searchBox: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    borderRadius: theme.radius.pill,
+    borderBottomColor: theme.colors.border.strong,
+    borderBottomWidth: 1,
     flexDirection: 'row',
     gap: theme.spacing.sm,
     minHeight: 50,
@@ -278,15 +278,15 @@ const useStyles = createThemedStyles((theme) => ({
   },
   filterChip: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    borderRadius: theme.radius.pill,
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     minHeight: 38,
     paddingHorizontal: theme.spacing.md,
   },
   filterChipSelected: {
-    backgroundColor: theme.colors.brand.soft,
+    borderBottomColor: theme.colors.brand.primary,
   },
   filterChipTextSelected: {
     color: theme.colors.brand.primary,

@@ -107,6 +107,24 @@ export class WordRepository {
     return row?.count ?? 0;
   }
 
+  async listAdditionDates(): Promise<string[]> {
+    const rows = await this.database.getAllAsync<{ date: string }>(
+      `SELECT DISTINCT date(created_at, 'localtime') AS date
+       FROM words
+       WHERE (
+           local_user_id = $localUserId
+           OR ($userId IS NOT NULL AND user_id = $userId)
+         )
+       ORDER BY date DESC`,
+      {
+        $localUserId: this.identity.localUserId,
+        $userId: this.identity.linkedUserId,
+      },
+    );
+
+    return rows.map((row) => row.date);
+  }
+
   async create(input: CreateWordInput): Promise<VocabularyWord> {
     const word = normalizeRequiredText(input.word, 'Word');
     const normalizedWord = normalizeLookupValue(word);

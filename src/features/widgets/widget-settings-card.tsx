@@ -2,7 +2,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
 
-import { AppButton, AppText, Card } from '@/components/ui';
+import { AppButton, AppText } from '@/components/ui';
 import { useLocalData } from '@/data';
 import type {
   WidgetContentSource,
@@ -72,7 +72,7 @@ export function WidgetSettingsCard() {
   }
 
   return (
-    <Card style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.headingRow}>
         <View style={styles.iconContainer}>
           <MaterialIcons color={theme.colors.brand.primary} name="widgets" size={24} />
@@ -181,7 +181,7 @@ export function WidgetSettingsCard() {
             : 'Widget installation is available in the iOS and Android development builds.'}
         </AppText>
       )}
-    </Card>
+    </View>
   );
 }
 
@@ -233,7 +233,11 @@ function ChoiceChip({
 
 const useStyles = createThemedStyles((theme) => ({
   card: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xs,
+    paddingTop: theme.spacing.lg,
   },
   headingRow: {
     alignItems: 'center',
@@ -242,8 +246,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   iconContainer: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.md,
     height: 44,
     justifyContent: 'center',
     width: 44,
@@ -265,17 +267,14 @@ const useStyles = createThemedStyles((theme) => ({
     paddingRight: theme.spacing.lg,
   },
   choice: {
-    backgroundColor: theme.colors.background.muted,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.pill,
-    borderWidth: 1,
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
     minHeight: 36,
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: theme.spacing.xs,
   },
   choiceSelected: {
-    backgroundColor: theme.colors.brand.soft,
-    borderColor: theme.colors.brand.primary,
+    borderBottomColor: theme.colors.brand.primary,
   },
   choicePressed: {
     opacity: 0.75,
@@ -288,8 +287,8 @@ const useStyles = createThemedStyles((theme) => ({
   },
   actionSummary: {
     alignItems: 'flex-start',
-    backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.md,
+    borderLeftColor: theme.colors.brand.primary,
+    borderLeftWidth: 2,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     padding: theme.spacing.sm,

@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
-import { AppButton, AppText, Card, EmptyState, Screen } from '@/components/ui';
+import { AppButton, AppText, EmptyState, Screen } from '@/components/ui';
 import type { ReviewResponse, VocabularyReviewHistoryItem } from '@/domain/vocabulary';
 import { useReview } from '@/features/review';
 import { useVocabulary } from '@/features/vocabulary';
@@ -119,7 +119,7 @@ export default function ReviewScreen() {
           />
 
           {currentWord ? (
-            <Card style={styles.reviewCard}>
+            <View style={styles.reviewCard}>
               <View style={styles.wordHeading}>
                 <View style={styles.wordCopy}>
                   <AppText style={styles.reviewWord} variant="editorial">
@@ -178,14 +178,14 @@ export default function ReviewScreen() {
                   ) : null}
                 </View>
               )}
-            </Card>
+            </View>
           ) : dueCount > 0 || isLoading ? (
             <View style={styles.loadingNext}>
               <ActivityIndicator color={theme.colors.brand.primary} />
               <AppText tone="secondary">Loading the next words…</AppText>
             </View>
           ) : (
-            <Card style={styles.completeCard}>
+            <View style={styles.completeCard}>
               <View style={styles.completeIcon}>
                 <MaterialIcons
                   color={theme.colors.semantic.success.foreground}
@@ -204,7 +204,7 @@ export default function ReviewScreen() {
                 onPress={() => setIsSessionActive(false)}
                 variant="secondary"
               />
-            </Card>
+            </View>
           )}
 
           {isRevealed && currentWord ? (
@@ -261,18 +261,18 @@ export default function ReviewScreen() {
         </View>
 
         <View style={styles.statsRow}>
-          <Card style={styles.statCard}>
+          <View style={styles.statCard}>
             <AppText variant="title">{dueCount}</AppText>
             <AppText tone="tertiary" variant="caption">
               DUE NOW
             </AppText>
-          </Card>
-          <Card style={styles.statCard}>
+          </View>
+          <View style={styles.statCard}>
             <AppText variant="title">{reviewedToday}</AppText>
             <AppText tone="tertiary" variant="caption">
               REVIEWED TODAY
             </AppText>
-          </Card>
+          </View>
         </View>
 
         {error && dueWords.length === 0 ? (
@@ -284,7 +284,7 @@ export default function ReviewScreen() {
             title="Review unavailable"
           />
         ) : dueCount > 0 ? (
-          <Card style={styles.startCard}>
+          <View style={styles.startCard}>
             <View style={styles.startIcon}>
               <MaterialIcons color={theme.colors.brand.primary} name="school" size={30} />
             </View>
@@ -295,7 +295,7 @@ export default function ReviewScreen() {
               </AppText>
             </View>
             <AppButton label="Start review" onPress={startSession} />
-          </Card>
+          </View>
         ) : (
           <EmptyState
             actionLabel={wordCount === 0 ? 'Add a word' : undefined}
@@ -355,7 +355,7 @@ function ResponseButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.responseButton,
-        { backgroundColor: colors.background },
+        { backgroundColor: colors.background, borderTopColor: colors.foreground },
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}
@@ -375,7 +375,7 @@ function RecentActivity({ reviews }: { reviews: VocabularyReviewHistoryItem[] })
   return (
     <View style={styles.recentSection}>
       <AppText variant="subtitle">Recent activity</AppText>
-      <Card style={styles.recentCard}>
+      <View style={styles.recentCard}>
         {reviews.map((review, index) => (
           <Pressable
             accessibilityRole="button"
@@ -403,7 +403,7 @@ function RecentActivity({ reviews }: { reviews: VocabularyReviewHistoryItem[] })
             </AppText>
           </Pressable>
         ))}
-      </Card>
+      </View>
     </View>
   );
 }
@@ -453,16 +453,22 @@ const useStyles = createThemedStyles((theme) => ({
     lineHeight: 44,
   },
   statCard: {
+    borderTopColor: theme.colors.border.strong,
+    borderTopWidth: 1,
     flex: 1,
     gap: theme.spacing.xs,
+    paddingVertical: theme.spacing.md,
   },
   startCard: {
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.md,
+    paddingVertical: theme.spacing.xl,
   },
   startIcon: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.pill,
     height: 62,
     justifyContent: 'center',
     width: 62,
@@ -497,6 +503,7 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.xl,
     justifyContent: 'center',
     minHeight: 390,
+    paddingVertical: theme.spacing.xl,
   },
   wordHeading: {
     alignItems: 'center',
@@ -517,8 +524,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   categoryPill: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.pill,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     paddingHorizontal: theme.spacing.sm,
@@ -541,8 +546,8 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.lg,
   },
   definitionBlock: {
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.md,
+    borderLeftColor: theme.colors.brand.primary,
+    borderLeftWidth: 3,
     gap: theme.spacing.xs,
     padding: theme.spacing.md,
   },
@@ -558,7 +563,7 @@ const useStyles = createThemedStyles((theme) => ({
   },
   responseButton: {
     alignItems: 'center',
-    borderRadius: theme.radius.md,
+    borderTopWidth: 2,
     flex: 1,
     gap: theme.spacing.xs,
     justifyContent: 'center',
@@ -602,7 +607,8 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.sm,
   },
   recentCard: {
-    paddingVertical: theme.spacing.xs,
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
   },
   recentRow: {
     alignItems: 'center',
@@ -617,8 +623,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   recentIcon: {
     alignItems: 'center',
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.pill,
     height: 34,
     justifyContent: 'center',
     width: 34,

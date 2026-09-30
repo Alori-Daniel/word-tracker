@@ -12,7 +12,7 @@ export default function HomeScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
   const { dueCount, reviewedToday } = useReview();
-  const { categories, recentWords, updateWord, wordCount } = useVocabulary();
+  const { categories, recentWords, updateWord, wordAdditionStreak, wordCount } = useVocabulary();
   const featuredWord = recentWords[0];
   const categoryById = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -40,7 +40,9 @@ export default function HomeScreen() {
           <View style={styles.topActions}>
             <View style={styles.progressPill}>
               <MaterialIcons color={theme.colors.brand.primary} name="local-fire-department" size={17} />
-              <AppText variant="caption">{reviewedToday} today</AppText>
+              <AppText variant="caption">
+                {wordAdditionStreak.current} {wordAdditionStreak.current === 1 ? 'day' : 'days'}
+              </AppText>
             </View>
             <Pressable
               accessibilityLabel="Open settings"
@@ -105,6 +107,42 @@ export default function HomeScreen() {
             <AppButton label="Add your first word" onPress={() => router.push('/(tabs)/add')} />
           </View>
         )}
+
+        <View style={styles.streakSection}>
+          <View style={styles.streakHeading}>
+            <MaterialIcons
+              color={wordAdditionStreak.addedToday
+                ? theme.colors.brand.primary
+                : theme.colors.content.tertiary}
+              name="local-fire-department"
+              size={28}
+            />
+            <View style={styles.practiceCopy}>
+              <AppText variant="subtitle">
+                {wordAdditionStreak.current === 0
+                  ? 'Start your word streak'
+                  : `${wordAdditionStreak.current}-day word streak`}
+              </AppText>
+              <AppText tone="secondary" variant="caption">
+                {wordAdditionStreak.addedToday
+                  ? 'Today is complete. Come back tomorrow to continue.'
+                  : 'Add one new word today to keep your streak going.'}
+              </AppText>
+            </View>
+          </View>
+          <View style={styles.streakDays}>
+            {wordAdditionStreak.lastSevenDays.map((isActive, index) => (
+              <View key={index} style={styles.streakDay}>
+                <AppText tone="tertiary" variant="caption">{relativeWeekday(index)}</AppText>
+                <View style={[styles.streakDot, isActive && styles.streakDotActive]}>
+                  {isActive ? (
+                    <MaterialIcons color={theme.colors.brand.onPrimary} name="check" size={13} />
+                  ) : null}
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
 
         <View style={styles.practiceCard}>
           <View style={styles.practiceCopy}>
@@ -271,8 +309,10 @@ const useStyles = createThemedStyles((theme) => ({
   emptyDescription: { maxWidth: 440, textAlign: 'center' },
   practiceCard: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    borderRadius: theme.radius.xl,
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     flexDirection: 'row',
     gap: theme.spacing.md,
     padding: theme.spacing.md,
@@ -286,9 +326,47 @@ const useStyles = createThemedStyles((theme) => ({
     justifyContent: 'center',
     width: 48,
   },
+  streakSection: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
+    gap: theme.spacing.lg,
+    paddingVertical: theme.spacing.lg,
+  },
+  streakHeading: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+  },
+  streakDays: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  streakDay: {
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+  },
+  streakDot: {
+    alignItems: 'center',
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
+  streakDotActive: {
+    backgroundColor: theme.colors.brand.primary,
+    borderColor: theme.colors.brand.primary,
+  },
   recentSection: { gap: theme.spacing.md },
   sectionHeading: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   link: { color: theme.colors.brand.primary },
   recentList: { gap: theme.spacing.sm },
   pressed: { opacity: 0.62 },
 }));
+
+function relativeWeekday(index: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + index - 6);
+  return new Intl.DateTimeFormat(undefined, { weekday: 'narrow' }).format(date);
+}

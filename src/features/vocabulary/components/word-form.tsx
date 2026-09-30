@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-import { AppButton, AppText, Card } from '@/components/ui';
+import { AppButton, AppText } from '@/components/ui';
 import { DuplicateWordError } from '@/data';
 import { LEARNING_STATUSES, type CreateWordInput } from '@/domain/vocabulary';
 import { applyDictionarySenseToWordForm, DictionaryLookupPanel } from '@/features/dictionary';
@@ -79,7 +79,7 @@ export function WordForm({
 
   return (
     <View style={styles.form}>
-      <Card style={styles.section}>
+      <View style={styles.section}>
         <View style={styles.sectionHeadingCopy}>
           <AppText variant="subtitle">Word and meaning</AppText>
           <AppText tone="secondary" variant="caption">
@@ -133,9 +133,9 @@ export function WordForm({
               : ''}
           </AppText>
         ) : null}
-      </Card>
+      </View>
 
-      <Card style={styles.section}>
+      <View style={styles.section}>
         <View style={styles.sectionHeadingCopy}>
           <AppText variant="subtitle">Organize</AppText>
           <AppText tone="secondary" variant="caption">Optional details for your collection</AppText>
@@ -201,9 +201,9 @@ export function WordForm({
           placeholder="Book, article, conversation…"
           value={values.source}
         />
-      </Card>
+      </View>
 
-      <Card style={styles.section}>
+      <View style={styles.section}>
         <Pressable
           accessibilityRole="button"
           accessibilityState={{ expanded: showMoreDetails }}
@@ -303,7 +303,7 @@ export function WordForm({
             </View>
           </View>
         ) : null}
-      </Card>
+      </View>
 
       {errorMessage ? (
         <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
@@ -403,7 +403,10 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.md,
   },
   section: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.lg,
+    paddingVertical: theme.spacing.lg,
   },
   sectionHeading: {
     alignItems: 'center',
@@ -432,10 +435,9 @@ const useStyles = createThemedStyles((theme) => ({
     color: theme.colors.content.tertiary,
   },
   input: {
-    backgroundColor: theme.colors.background.canvas,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
+    backgroundColor: 'transparent',
+    borderBottomColor: theme.colors.border.default,
+    borderBottomWidth: 1,
     color: theme.colors.content.primary,
     fontSize: 16,
     minHeight: 48,
@@ -462,15 +464,15 @@ const useStyles = createThemedStyles((theme) => ({
   },
   choice: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.pill,
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     minHeight: 40,
     paddingHorizontal: theme.spacing.md,
   },
   choiceSelected: {
-    backgroundColor: theme.colors.brand.soft,
+    borderBottomColor: theme.colors.brand.primary,
   },
   choiceSelectedText: {
     color: theme.colors.brand.primary,

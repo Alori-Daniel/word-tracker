@@ -170,10 +170,12 @@ export function DictionaryLookupPanel({
 
 const useStyles = createThemedStyles((theme) => ({
   container: {
-    backgroundColor: theme.colors.background.canvas,
-    borderRadius: theme.radius.lg,
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.md,
-    padding: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
   },
   headingRow: {
     alignItems: "flex-start",
@@ -209,15 +211,12 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.xxs,
   },
   sense: {
-    backgroundColor: theme.colors.background.muted,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
     gap: theme.spacing.xs,
     padding: theme.spacing.md,
   },
   senseSelected: {
-    backgroundColor: theme.colors.brand.soft,
     borderColor: theme.colors.brand.primary,
   },
   sensePressed: {
