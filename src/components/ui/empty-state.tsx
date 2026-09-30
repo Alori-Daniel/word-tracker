@@ -45,7 +45,7 @@ const useStyles = createThemedStyles((theme) => ({
     alignItems: 'center',
     gap: theme.spacing.md,
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.xl,
+    paddingVertical: theme.spacing.xxl,
   },
   iconContainer: {
     alignItems: 'center',

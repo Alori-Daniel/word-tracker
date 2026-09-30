@@ -6,7 +6,6 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-nat
 import {
   AppButton,
   AppText,
-  Card,
   EmptyState,
   NavigationHeader,
   Screen,
@@ -104,6 +103,7 @@ export default function WordDetailScreen() {
         disabled={isUpdating}
         hitSlop={8}
         onPress={() => void toggleFavorite()}
+        style={styles.headerActionButton}
       >
         <MaterialIcons
           color={word.isFavorite ? theme.colors.brand.primary : theme.colors.content.secondary}
@@ -118,6 +118,7 @@ export default function WordDetailScreen() {
         onPress={() =>
           router.push({ pathname: '/word/[id]/edit', params: { id: word.id } })
         }
+        style={styles.headerActionButton}
       >
         <MaterialIcons color={theme.colors.content.primary} name="edit" size={23} />
       </Pressable>
@@ -126,7 +127,7 @@ export default function WordDetailScreen() {
 
   return (
     <Screen edges={['top', 'right', 'bottom', 'left']}>
-      <NavigationHeader onBack={() => router.back()} rightAccessory={headerActions} title="Word details" />
+      <NavigationHeader onBack={() => router.back()} rightAccessory={headerActions} title="Word" />
 
       {isLoading ? (
         <View style={styles.centered}>
@@ -150,7 +151,7 @@ export default function WordDetailScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
             <View style={styles.heroTitleRow}>
-              <AppText style={styles.word} variant="display">
+              <AppText style={styles.word} variant="editorial">
                 {word.word}
               </AppText>
               {word.partOfSpeech ? (
@@ -233,7 +234,7 @@ export default function WordDetailScreen() {
             </DetailSection>
           ) : null}
 
-          <Card style={styles.datesCard}>
+          <View style={styles.datesCard}>
             <AppText tone="tertiary" variant="caption">
               SAVED {formatDate(word.createdAt)}
             </AppText>
@@ -245,7 +246,7 @@ export default function WordDetailScreen() {
                 NEXT REVIEW {formatDateTime(word.nextReviewAt)}
               </AppText>
             ) : null}
-          </Card>
+          </View>
 
           <AppButton
             label="Edit word"
@@ -278,10 +279,10 @@ function DetailSection({ children, title }: { children: ReactNode; title: string
   const styles = useStyles();
 
   return (
-    <Card style={styles.section}>
+    <View style={styles.section}>
       <AppText variant="subtitle">{title}</AppText>
       {children}
-    </Card>
+    </View>
   );
 }
 
@@ -333,6 +334,14 @@ const useStyles = createThemedStyles((theme) => ({
     flexDirection: 'row',
     gap: theme.spacing.md,
   },
+  headerActionButton: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.surface,
+    borderRadius: theme.radius.pill,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
   centered: {
     alignItems: 'center',
     flex: 1,
@@ -353,17 +362,24 @@ const useStyles = createThemedStyles((theme) => ({
     width: '100%',
   },
   hero: {
+    alignItems: 'center',
     gap: theme.spacing.sm,
-    paddingVertical: theme.spacing.md,
+    minHeight: 210,
+    justifyContent: 'center',
+    paddingVertical: theme.spacing.xl,
   },
   heroTitleRow: {
     alignItems: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: theme.spacing.sm,
+    justifyContent: 'center',
   },
   word: {
     flexShrink: 1,
+    fontSize: 46,
+    lineHeight: 54,
+    textAlign: 'center',
   },
   partOfSpeech: {
     backgroundColor: theme.colors.background.muted,
@@ -377,6 +393,7 @@ const useStyles = createThemedStyles((theme) => ({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: theme.spacing.md,
+    justifyContent: 'center',
   },
   status: {
     borderRadius: theme.radius.pill,
@@ -412,7 +429,10 @@ const useStyles = createThemedStyles((theme) => ({
     width: 9,
   },
   section: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     gap: theme.spacing.md,
+    paddingTop: theme.spacing.lg,
   },
   simpleDefinition: {
     backgroundColor: theme.colors.background.muted,
@@ -445,6 +465,8 @@ const useStyles = createThemedStyles((theme) => ({
     paddingVertical: theme.spacing.xs,
   },
   datesCard: {
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: theme.spacing.md,

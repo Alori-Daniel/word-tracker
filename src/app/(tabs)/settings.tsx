@@ -7,7 +7,6 @@ import {
   AppButton,
   AppText,
   Card,
-  PageHeader,
   Screen,
   ThemeModeSelector,
 } from '@/components/ui';
@@ -27,7 +26,7 @@ const ACCOUNT_BENEFITS = [
 export default function SettingsScreen() {
   const styles = useStyles();
   const { resolvedMode, theme } = useAppTheme();
-  const { databaseVersion, identity, setOnboardingCompleted } = useLocalData();
+  const { setOnboardingCompleted } = useLocalData();
   const {
     account,
     errorMessage: accountError,
@@ -63,14 +62,14 @@ export default function SettingsScreen() {
   return (
     <Screen edges={['top', 'right', 'left']}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <PageHeader
-          description="Manage your account, appearance, and local vault."
-          eyebrow="Make it yours"
-          title="Settings"
-        />
+        <View style={styles.pageHeading}>
+          <AppText tone="tertiary" variant="caption">WORDECHO</AppText>
+          <AppText style={styles.pageTitle} variant="editorial">Make it yours</AppText>
+          <AppText tone="secondary">Account, appearance, widgets, and your collection.</AppText>
+        </View>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Account</AppText>
+          <SectionTitle>Account</SectionTitle>
           <Card style={styles.card}>
             <View style={styles.accountHeading}>
               <View style={styles.accountAvatar}>
@@ -172,7 +171,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Premium</AppText>
+          <SectionTitle>Premium</SectionTitle>
           <Card style={styles.card}>
             <View style={styles.premiumHeading}>
               <View style={styles.premiumIcon}>
@@ -206,7 +205,7 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Appearance</AppText>
+          <SectionTitle>Appearance</SectionTitle>
           <Card style={styles.card}>
             <View style={styles.settingCopy}>
               <AppText variant="label">Color mode</AppText>
@@ -219,12 +218,12 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Home Screen widget</AppText>
+          <SectionTitle>Home Screen widget</SectionTitle>
           <WidgetSettingsCard />
         </View>
 
         <View style={styles.section}>
-          <AppText variant="subtitle">Local vault</AppText>
+          <SectionTitle>Local vault</SectionTitle>
           <Card style={styles.card}>
             <View style={styles.dataRow}>
               <AppText tone="secondary">Saved words</AppText>
@@ -233,14 +232,6 @@ export default function SettingsScreen() {
             <View style={styles.dataRow}>
               <AppText tone="secondary">Categories</AppText>
               <AppText variant="label">{categories.length}</AppText>
-            </View>
-            <View style={styles.dataRow}>
-              <AppText tone="secondary">Guest ID</AppText>
-              <AppText variant="label">{identity.localUserId.slice(0, 8)}…</AppText>
-            </View>
-            <View style={styles.dataRow}>
-              <AppText tone="secondary">Database</AppText>
-              <AppText variant="label">Version {databaseVersion}</AppText>
             </View>
             <AppButton
               label="Manage categories"
@@ -261,6 +252,11 @@ export default function SettingsScreen() {
   );
 }
 
+function SectionTitle({ children }: { children: string }) {
+  const styles = useStyles();
+  return <AppText style={styles.sectionTitle} variant="caption">{children.toUpperCase()}</AppText>;
+}
+
 const useStyles = createThemedStyles((theme) => ({
   content: {
     gap: theme.spacing.xl,
@@ -273,6 +269,18 @@ const useStyles = createThemedStyles((theme) => ({
   },
   section: {
     gap: theme.spacing.sm,
+  },
+  pageHeading: {
+    gap: theme.spacing.sm,
+  },
+  pageTitle: {
+    fontSize: 38,
+    lineHeight: 44,
+  },
+  sectionTitle: {
+    color: theme.colors.content.tertiary,
+    letterSpacing: 1.1,
+    paddingLeft: theme.spacing.xs,
   },
   card: {
     gap: theme.spacing.lg,

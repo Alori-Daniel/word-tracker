@@ -1,11 +1,13 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Redirect, Tabs } from 'expo-router';
+import { View } from 'react-native';
 
 import { useLocalData } from '@/data';
 import { useReview } from '@/features/review';
-import { useAppTheme } from '@/theme';
+import { createThemedStyles, useAppTheme } from '@/theme';
 
 export default function TabLayout() {
+  const styles = useStyles();
   const { settings } = useLocalData();
   const { dueCount } = useReview();
   const { theme } = useAppTheme();
@@ -21,22 +23,39 @@ export default function TabLayout() {
         sceneStyle: { backgroundColor: theme.colors.background.canvas },
         tabBarActiveTintColor: theme.colors.brand.primary,
         tabBarInactiveTintColor: theme.colors.content.tertiary,
+        tabBarActiveBackgroundColor: theme.colors.brand.soft,
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
+          marginTop: 1,
         },
         tabBarStyle: {
           backgroundColor: theme.colors.background.surface,
-          borderTopColor: theme.colors.border.subtle,
-          paddingTop: 6,
+          borderRadius: theme.radius.xl,
+          borderTopWidth: 0,
+          elevation: 8,
+          height: 70,
+          marginBottom: 10,
+          marginHorizontal: 14,
+          paddingBottom: 8,
+          paddingTop: 8,
+          shadowColor: theme.colors.overlay.shadow,
+          shadowOffset: { height: 5, width: 0 },
+          shadowOpacity: 0.12,
+          shadowRadius: 16,
         },
+        tabBarItemStyle: {
+          borderRadius: theme.radius.lg,
+          marginHorizontal: 3,
+          marginVertical: 4,
+        },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Today',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons color={color} name="home" size={size} />
           ),
@@ -45,7 +64,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          title: 'Library',
+          title: 'Words',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons color={color} name="menu-book" size={size} />
           ),
@@ -55,7 +74,11 @@ export default function TabLayout() {
         name="add"
         options={{
           title: 'Add',
-          tabBarIcon: ({ color }) => <MaterialIcons color={color} name="add-circle" size={31} />,
+          tabBarIcon: () => (
+            <View style={styles.addIcon}>
+              <MaterialIcons color={theme.colors.brand.onPrimary} name="add" size={27} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
@@ -85,3 +108,15 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const useStyles = createThemedStyles((theme) => ({
+  addIcon: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.brand.primary,
+    borderRadius: theme.radius.pill,
+    height: 42,
+    justifyContent: 'center',
+    marginTop: -8,
+    width: 42,
+  },
+}));

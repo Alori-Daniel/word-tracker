@@ -59,25 +59,15 @@ export function DictionaryLookupPanel({
   return (
     <View style={styles.container}>
       <View style={styles.headingRow}>
-        <View style={styles.iconContainer}>
-          <MaterialIcons
-            color={theme.colors.brand.primary}
-            name="menu-book"
-            size={20}
-          />
-        </View>
         <View style={styles.headingCopy}>
           <View style={styles.titleRow}>
-            <AppText variant="label">Look up word</AppText>
+            <AppText tone="secondary" variant="label">Dictionary assist</AppText>
             <View style={styles.freeBadge}>
               <AppText style={styles.freeLabel} variant="caption">
                 Free
               </AppText>
             </View>
           </View>
-          <AppText tone="secondary" variant="caption">
-            Find the word, then choose the meaning you intend.
-          </AppText>
         </View>
       </View>
 
@@ -89,7 +79,7 @@ export function DictionaryLookupPanel({
 
       <AppButton
         disabled={!isConfigured}
-        label="Look up word"
+        label="Find a meaning"
         leftAccessory={
           <MaterialIcons
             color={theme.colors.brand.primary}
@@ -180,23 +170,15 @@ export function DictionaryLookupPanel({
 
 const useStyles = createThemedStyles((theme) => ({
   container: {
-    borderTopColor: theme.colors.border.subtle,
-    borderTopWidth: 1,
+    backgroundColor: theme.colors.background.canvas,
+    borderRadius: theme.radius.lg,
     gap: theme.spacing.md,
-    paddingTop: theme.spacing.md,
+    padding: theme.spacing.md,
   },
   headingRow: {
     alignItems: "flex-start",
     flexDirection: "row",
     gap: theme.spacing.sm,
-  },
-  iconContainer: {
-    alignItems: "center",
-    backgroundColor: theme.colors.brand.soft,
-    borderRadius: theme.radius.md,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
   },
   headingCopy: {
     flex: 1,

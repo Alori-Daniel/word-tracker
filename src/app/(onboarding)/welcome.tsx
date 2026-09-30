@@ -94,7 +94,7 @@ export default function WelcomeScreen() {
               <MaterialIcons color={theme.colors.brand.onPrimary} name="auto-stories" size={34} />
             </View>
             <View style={styles.accountCopy}>
-              <AppText style={styles.centerText} variant="display">
+              <AppText style={styles.centerText} variant="editorial">
                 Welcome to WordEcho
               </AppText>
               <AppText style={styles.accountDescription} tone="secondary">
@@ -145,7 +145,7 @@ export default function WelcomeScreen() {
           </View>
 
           <View style={styles.slideCopy}>
-            <AppText style={styles.slideTitle} variant="display">
+            <AppText style={styles.slideTitle} variant="editorial">
               {slide.title}
             </AppText>
             <AppText style={styles.slideDescription} tone="secondary">

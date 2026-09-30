@@ -179,9 +179,9 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.xs,
   },
   input: {
-    backgroundColor: theme.colors.background.muted,
-    borderColor: theme.colors.border.default,
-    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.background.canvas,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.radius.lg,
     borderWidth: 1,
     color: theme.colors.content.primary,
     fontSize: 16,

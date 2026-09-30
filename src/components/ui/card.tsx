@@ -15,9 +15,7 @@ const useStyles = createThemedStyles((theme) => ({
   card: {
     ...theme.shadows.card,
     backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
+    borderRadius: theme.radius.xl,
     padding: theme.spacing.lg,
   },
 }));

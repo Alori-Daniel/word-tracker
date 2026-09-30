@@ -26,7 +26,7 @@ export function WordListItem({ category, onPress, word }: WordListItemProps) {
       <View style={styles.topRow}>
         <View style={styles.wordCopy}>
           <View style={styles.titleRow}>
-            <AppText numberOfLines={1} style={styles.title} variant="subtitle">
+            <AppText numberOfLines={1} style={styles.title} variant="editorial">
               {word.word}
             </AppText>
             {word.isFavorite ? (
@@ -68,11 +68,9 @@ export function WordListItem({ category, onPress, word }: WordListItemProps) {
 const useStyles = createThemedStyles((theme) => ({
   card: {
     backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
+    borderRadius: theme.radius.xl,
     gap: theme.spacing.sm,
-    padding: theme.spacing.md,
+    padding: theme.spacing.lg,
   },
   pressed: {
     opacity: 0.72,
@@ -93,6 +91,8 @@ const useStyles = createThemedStyles((theme) => ({
   },
   title: {
     flexShrink: 1,
+    fontSize: 24,
+    lineHeight: 30,
   },
   metaRow: {
     alignItems: 'center',

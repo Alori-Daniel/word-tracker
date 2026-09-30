@@ -1,24 +1,38 @@
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
-export type TextVariant = 'display' | 'title' | 'subtitle' | 'body' | 'label' | 'caption';
+export type TextVariant =
+  | 'editorial'
+  | 'display'
+  | 'title'
+  | 'subtitle'
+  | 'body'
+  | 'label'
+  | 'caption';
 
 type TypographyStyle = Pick<
   TextStyle,
-  'fontSize' | 'fontWeight' | 'letterSpacing' | 'lineHeight'
+  'fontFamily' | 'fontSize' | 'fontWeight' | 'letterSpacing' | 'lineHeight'
 >;
 
 export const typography: Record<TextVariant, TypographyStyle> = {
+  editorial: {
+    fontFamily: Platform.select({ android: 'serif', default: 'Georgia', ios: 'Georgia' }),
+    fontSize: 42,
+    fontWeight: '700',
+    letterSpacing: -1,
+    lineHeight: 50,
+  },
   display: {
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '700',
     letterSpacing: -1.1,
     lineHeight: 42,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '700',
     letterSpacing: -0.4,
-    lineHeight: 30,
+    lineHeight: 33,
   },
   subtitle: {
     fontSize: 18,

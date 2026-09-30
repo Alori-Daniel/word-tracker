@@ -48,13 +48,13 @@ export function ThemeModeSelector() {
 const useStyles = createThemedStyles((theme) => ({
   container: {
     backgroundColor: theme.colors.background.muted,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.pill,
     flexDirection: 'row',
     padding: theme.spacing.xxs,
   },
   option: {
     alignItems: 'center',
-    borderRadius: theme.radius.sm,
+    borderRadius: theme.radius.pill,
     flex: 1,
     minHeight: 40,
     justifyContent: 'center',

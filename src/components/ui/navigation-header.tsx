@@ -39,14 +39,16 @@ const useStyles = createThemedStyles((theme) => ({
   header: {
     alignItems: 'center',
     flexDirection: 'row',
-    minHeight: 56,
+    minHeight: 64,
     paddingHorizontal: theme.spacing.md,
   },
   backButton: {
     alignItems: 'center',
-    height: 44,
+    backgroundColor: theme.colors.background.surface,
+    borderRadius: theme.radius.pill,
+    height: 42,
     justifyContent: 'center',
-    width: 44,
+    width: 42,
   },
   pressed: {
     opacity: 0.58,
@@ -57,6 +59,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   right: {
     alignItems: 'flex-end',
-    minWidth: 44,
+    minWidth: 42,
   },
 }));

@@ -47,10 +47,10 @@ export type AppColors = {
 
 export const lightColors = {
   background: {
-    canvas: '#F5F5F8',
-    surface: '#FFFFFF',
-    elevated: '#FAFAFC',
-    muted: '#EEEFF3',
+    canvas: '#F5F3ED',
+    surface: '#FFFEFA',
+    elevated: '#FFFFFF',
+    muted: '#ECE9E1',
   },
   content: {
     primary: '#17191D',
@@ -60,9 +60,9 @@ export const lightColors = {
     disabled: '#A8ACB5',
   },
   border: {
-    subtle: '#E3E5EA',
-    default: '#CCD0D8',
-    strong: '#858B97',
+    subtle: '#E5E1D8',
+    default: '#D2CDC2',
+    strong: '#858177',
   },
   brand: {
     primary: '#0878B8',
@@ -89,10 +89,10 @@ export const lightColors = {
 
 export const darkColors = {
   background: {
-    canvas: '#101113',
-    surface: '#1A1B1E',
-    elevated: '#22242A',
-    muted: '#292C32',
+    canvas: '#10141C',
+    surface: '#181E29',
+    elevated: '#202837',
+    muted: '#273142',
   },
   content: {
     primary: '#F3F4F7',
@@ -102,9 +102,9 @@ export const darkColors = {
     disabled: '#626772',
   },
   border: {
-    subtle: '#2B2E34',
-    default: '#3C414B',
-    strong: '#687181',
+    subtle: '#293345',
+    default: '#3A475D',
+    strong: '#68758A',
   },
   brand: {
     primary: '#8FB2FF',

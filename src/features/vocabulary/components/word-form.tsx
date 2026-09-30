@@ -81,7 +81,7 @@ export function WordForm({
     <View style={styles.form}>
       <Card style={styles.section}>
         <View style={styles.sectionHeadingCopy}>
-          <AppText variant="subtitle">Quick add</AppText>
+          <AppText variant="subtitle">Word and meaning</AppText>
           <AppText tone="secondary" variant="caption">
             Only the word and meaning are required.
           </AppText>
@@ -101,6 +101,7 @@ export function WordForm({
           }}
           placeholder="e.g. ephemeral"
           required
+          style={styles.wordInput}
           value={values.word}
         />
         <DictionaryLookupPanel
@@ -135,7 +136,11 @@ export function WordForm({
       </Card>
 
       <Card style={styles.section}>
-        <AppText variant="subtitle">Learning status</AppText>
+        <View style={styles.sectionHeadingCopy}>
+          <AppText variant="subtitle">Organize</AppText>
+          <AppText tone="secondary" variant="caption">Optional details for your collection</AppText>
+        </View>
+        <AppText tone="secondary" variant="label">Learning status</AppText>
         <View style={styles.wrappedChoices}>
           {LEARNING_STATUSES.map((status) => (
             <ChoiceChip
@@ -395,10 +400,10 @@ function ChoiceChip({
 
 const useStyles = createThemedStyles((theme) => ({
   form: {
-    gap: theme.spacing.lg,
+    gap: theme.spacing.md,
   },
   section: {
-    gap: theme.spacing.md,
+    gap: theme.spacing.lg,
   },
   sectionHeading: {
     alignItems: 'center',
@@ -427,9 +432,9 @@ const useStyles = createThemedStyles((theme) => ({
     color: theme.colors.content.tertiary,
   },
   input: {
-    backgroundColor: theme.colors.background.muted,
-    borderColor: theme.colors.border.default,
-    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.background.canvas,
+    borderColor: theme.colors.border.subtle,
+    borderRadius: theme.radius.lg,
     borderWidth: 1,
     color: theme.colors.content.primary,
     fontSize: 16,
@@ -440,6 +445,11 @@ const useStyles = createThemedStyles((theme) => ({
   multilineInput: {
     minHeight: 96,
     textAlignVertical: 'top',
+  },
+  wordInput: {
+    ...theme.typography.editorial,
+    fontSize: 26,
+    lineHeight: 34,
   },
   choiceRow: {
     gap: theme.spacing.xs,
@@ -453,9 +463,7 @@ const useStyles = createThemedStyles((theme) => ({
   choice: {
     alignItems: 'center',
     backgroundColor: theme.colors.background.muted,
-    borderColor: theme.colors.border.subtle,
     borderRadius: theme.radius.pill,
-    borderWidth: 1,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     minHeight: 40,
@@ -463,7 +471,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   choiceSelected: {
     backgroundColor: theme.colors.brand.soft,
-    borderColor: theme.colors.brand.primary,
   },
   choiceSelectedText: {
     color: theme.colors.brand.primary,

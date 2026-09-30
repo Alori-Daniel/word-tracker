@@ -3,7 +3,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
-import { AppButton, AppText, Card, EmptyState, PageHeader, Screen } from '@/components/ui';
+import { AppButton, AppText, Card, EmptyState, Screen } from '@/components/ui';
 import type { ReviewResponse, VocabularyReviewHistoryItem } from '@/domain/vocabulary';
 import { useReview } from '@/features/review';
 import { useVocabulary } from '@/features/vocabulary';
@@ -122,7 +122,7 @@ export default function ReviewScreen() {
             <Card style={styles.reviewCard}>
               <View style={styles.wordHeading}>
                 <View style={styles.wordCopy}>
-                  <AppText style={styles.reviewWord} variant="display">
+                  <AppText style={styles.reviewWord} variant="editorial">
                     {currentWord.word}
                   </AppText>
                   {currentWord.pronunciation ? (
@@ -254,11 +254,11 @@ export default function ReviewScreen() {
         refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
       >
-        <PageHeader
-          description="Strengthen your vocabulary with short, focused practice."
-          eyebrow="Make it stick"
-          title="Review"
-        />
+        <View style={styles.pageHeading}>
+          <AppText tone="tertiary" variant="caption">DAILY PRACTICE</AppText>
+          <AppText style={styles.pageTitle} variant="editorial">Make it stick</AppText>
+          <AppText tone="secondary">A few focused minutes keeps useful words close.</AppText>
+        </View>
 
         <View style={styles.statsRow}>
           <Card style={styles.statCard}>
@@ -445,6 +445,13 @@ const useStyles = createThemedStyles((theme) => ({
     flexDirection: 'row',
     gap: theme.spacing.sm,
   },
+  pageHeading: {
+    gap: theme.spacing.sm,
+  },
+  pageTitle: {
+    fontSize: 38,
+    lineHeight: 44,
+  },
   statCard: {
     flex: 1,
     gap: theme.spacing.xs,
@@ -486,21 +493,27 @@ const useStyles = createThemedStyles((theme) => ({
     height: '100%',
   },
   reviewCard: {
+    alignItems: 'stretch',
     gap: theme.spacing.xl,
-    minHeight: 340,
+    justifyContent: 'center',
+    minHeight: 390,
   },
   wordHeading: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
+    alignItems: 'center',
+    flexDirection: 'column',
     gap: theme.spacing.md,
     justifyContent: 'space-between',
   },
   wordCopy: {
+    alignItems: 'center',
     flex: 1,
     gap: theme.spacing.xs,
   },
   reviewWord: {
     flexShrink: 1,
+    fontSize: 44,
+    lineHeight: 52,
+    textAlign: 'center',
   },
   categoryPill: {
     alignItems: 'center',

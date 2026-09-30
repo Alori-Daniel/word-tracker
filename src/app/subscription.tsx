@@ -101,7 +101,7 @@ export default function SubscriptionScreen() {
           <View style={styles.heroIcon}>
             <MaterialIcons color={theme.colors.brand.primary} name="workspace-premium" size={32} />
           </View>
-          <AppText style={styles.centerText} variant="title">
+          <AppText style={styles.premiumTitle} variant="editorial">
             Grow your vocabulary without limits
           </AppText>
           <AppText style={styles.centerText} tone="secondary">
@@ -340,6 +340,7 @@ const useStyles = createThemedStyles((theme) => ({
     width: 64,
   },
   centerText: { textAlign: 'center' },
+  premiumTitle: { fontSize: 36, lineHeight: 43, textAlign: 'center' },
   benefitsCard: { gap: theme.spacing.md },
   benefitRow: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.sm },
   checkIcon: {
@@ -368,15 +369,13 @@ const useStyles = createThemedStyles((theme) => ({
   planCard: {
     alignItems: 'center',
     backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
     borderRadius: theme.radius.lg,
-    borderWidth: 1,
     flexDirection: 'row',
     gap: theme.spacing.sm,
     minHeight: 82,
     padding: theme.spacing.md,
   },
-  planCardSelected: { borderColor: theme.colors.brand.primary, borderWidth: 2 },
+  planCardSelected: { backgroundColor: theme.colors.brand.soft },
   pressed: { opacity: 0.82 },
   radio: {
     alignItems: 'center',

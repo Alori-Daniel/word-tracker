@@ -23,6 +23,7 @@ const useStyles = createThemedStyles((theme) => ({
   base: {
     color: theme.colors.content.primary,
   },
+  editorial: theme.typography.editorial,
   display: theme.typography.display,
   title: theme.typography.title,
   subtitle: theme.typography.subtitle,

@@ -58,8 +58,8 @@ export function AppButton({
 
 const useStyles = createThemedStyles((theme) => ({
   base: {
-    minHeight: 48,
-    borderRadius: theme.radius.md,
+    minHeight: 54,
+    borderRadius: theme.radius.pill,
     justifyContent: 'center',
     paddingHorizontal: theme.spacing.lg,
   },
@@ -80,8 +80,8 @@ const useStyles = createThemedStyles((theme) => ({
     backgroundColor: theme.colors.brand.pressed,
   },
   secondary: {
-    backgroundColor: theme.colors.brand.soft,
-    borderColor: theme.colors.border.default,
+    backgroundColor: theme.colors.background.surface,
+    borderColor: theme.colors.border.subtle,
     borderWidth: 1,
   },
   ghost: {

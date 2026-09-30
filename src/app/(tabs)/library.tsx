@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { AppText, EmptyState, PageHeader, Screen } from '@/components/ui';
+import { AppText, EmptyState, Screen } from '@/components/ui';
 import { LEARNING_STATUSES, type LearningStatus } from '@/domain/vocabulary';
 import { useVocabulary, useWordList, WordListItem } from '@/features/vocabulary';
 import { createThemedStyles, useAppTheme } from '@/theme';
@@ -39,11 +39,12 @@ export default function LibraryScreen() {
   const header = (
     <View style={styles.headerContent}>
       <View style={styles.titleRow}>
-        <PageHeader
-          description="Search, filter, and revisit every word you have saved."
-          eyebrow="Your collection"
-          title="Library"
-        />
+        <View style={styles.titleCopy}>
+          <AppText style={styles.pageTitle} variant="editorial">Your words</AppText>
+          <AppText tone="secondary" variant="caption">
+            {wordCount} SAVED · {categories.length} {categories.length === 1 ? 'CATEGORY' : 'CATEGORIES'}
+          </AppText>
+        </View>
         <Pressable
           accessibilityLabel="Add a word"
           accessibilityRole="button"
@@ -61,7 +62,7 @@ export default function LibraryScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           onChangeText={setQuery}
-          placeholder="Search words, meanings, notes…"
+          placeholder="Search your words"
           placeholderTextColor={theme.colors.content.tertiary}
           returnKeyType="search"
           selectionColor={theme.colors.brand.primary}
@@ -80,7 +81,7 @@ export default function LibraryScreen() {
         horizontal
         showsHorizontalScrollIndicator={false}
       >
-        <FilterChip label="All levels" onPress={() => setStatus(undefined)} selected={!status} />
+        <FilterChip label="All" onPress={() => setStatus(undefined)} selected={!status} />
         {LEARNING_STATUSES.map((item) => (
           <FilterChip
             key={item}
@@ -91,26 +92,28 @@ export default function LibraryScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView
-        contentContainerStyle={styles.filterRow}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      >
-        <FilterChip
-          label="All categories"
-          onPress={() => setCategoryId(undefined)}
-          selected={!categoryId}
-        />
-        {categories.map((category) => (
+      {categories.length > 0 ? (
+        <ScrollView
+          contentContainerStyle={styles.filterRow}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        >
           <FilterChip
-            color={category.color}
-            key={category.id}
-            label={category.name}
-            onPress={() => setCategoryId(category.id)}
-            selected={categoryId === category.id}
+            label="Every category"
+            onPress={() => setCategoryId(undefined)}
+            selected={!categoryId}
           />
-        ))}
-      </ScrollView>
+          {categories.map((category) => (
+            <FilterChip
+              color={category.color}
+              key={category.id}
+              label={category.name}
+              onPress={() => setCategoryId(category.id)}
+              selected={categoryId === category.id}
+            />
+          ))}
+        </ScrollView>
+      ) : null}
 
       {!isLoading && words.length > 0 ? (
         <AppText tone="tertiary" variant="caption">
@@ -225,7 +228,7 @@ const useStyles = createThemedStyles((theme) => ({
     width: '100%',
   },
   headerContent: {
-    gap: theme.spacing.md,
+    gap: theme.spacing.lg,
     paddingBottom: theme.spacing.lg,
     paddingTop: theme.spacing.xl,
   },
@@ -235,13 +238,21 @@ const useStyles = createThemedStyles((theme) => ({
     gap: theme.spacing.md,
     justifyContent: 'space-between',
   },
+  titleCopy: {
+    flex: 1,
+    gap: theme.spacing.xxs,
+  },
+  pageTitle: {
+    fontSize: 38,
+    lineHeight: 44,
+  },
   addButton: {
     alignItems: 'center',
     backgroundColor: theme.colors.brand.primary,
     borderRadius: theme.radius.pill,
-    height: 46,
+    height: 50,
     justifyContent: 'center',
-    width: 46,
+    width: 50,
   },
   pressed: {
     opacity: 0.7,
@@ -249,9 +260,7 @@ const useStyles = createThemedStyles((theme) => ({
   searchBox: {
     alignItems: 'center',
     backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
+    borderRadius: theme.radius.pill,
     flexDirection: 'row',
     gap: theme.spacing.sm,
     minHeight: 50,
@@ -270,9 +279,7 @@ const useStyles = createThemedStyles((theme) => ({
   filterChip: {
     alignItems: 'center',
     backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
     borderRadius: theme.radius.pill,
-    borderWidth: 1,
     flexDirection: 'row',
     gap: theme.spacing.xs,
     minHeight: 38,
@@ -280,7 +287,6 @@ const useStyles = createThemedStyles((theme) => ({
   },
   filterChipSelected: {
     backgroundColor: theme.colors.brand.soft,
-    borderColor: theme.colors.brand.primary,
   },
   filterChipTextSelected: {
     color: theme.colors.brand.primary,

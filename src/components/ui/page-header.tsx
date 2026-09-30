@@ -20,18 +20,26 @@ export function PageHeader({ description, eyebrow, title }: PageHeaderProps) {
           {eyebrow.toUpperCase()}
         </AppText>
       ) : null}
-      <AppText variant="title">{title}</AppText>
-      {description ? <AppText tone="secondary">{description}</AppText> : null}
+      <AppText style={styles.title} variant="title">{title}</AppText>
+      {description ? <AppText style={styles.description} tone="secondary">{description}</AppText> : null}
     </View>
   );
 }
 
 const useStyles = createThemedStyles((theme) => ({
   container: {
-    gap: theme.spacing.xs,
+    gap: theme.spacing.sm,
   },
   eyebrow: {
     color: theme.colors.brand.primary,
     letterSpacing: 1.4,
+  },
+  title: {
+    fontSize: 31,
+    lineHeight: 38,
+  },
+  description: {
+    lineHeight: 25,
+    maxWidth: 560,
   },
 }));
