@@ -1,8 +1,8 @@
-import { View } from 'react-native';
+import { View } from "react-native";
 
-import { createThemedStyles } from '@/theme';
+import { createThemedStyles } from "@/theme";
 
-import { AppText } from './app-text';
+import { AppText } from "./app-text";
 
 type PageHeaderProps = {
   description?: string;

@@ -1,7 +1,7 @@
-import { type ComponentProps } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { type ComponentProps } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { createThemedStyles } from '@/theme';
+import { createThemedStyles } from "@/theme";
 
 type ScreenProps = ComponentProps<typeof SafeAreaView>;
 
