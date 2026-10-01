@@ -427,11 +427,17 @@ export default function SettingsScreen() {
               }
             />
             <SettingRow
+              description="Add words from a structured CSV file."
+              icon="upload-file"
+              onPress={() => router.push('/import-words')}
+              title="Import words"
+            />
+            <SettingRow
               disabled={isExporting}
               description={isExporting ? 'Preparing your CSV…' : `${wordCount} saved words`}
               icon="file-download"
               onPress={() => void exportVocabulary()}
-              title="Export data"
+              title="Export words"
             />
             <SettingRow
               icon="shield"

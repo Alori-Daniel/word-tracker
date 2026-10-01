@@ -4,6 +4,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { GuestIdentity } from '@/domain/vocabulary';
 
 import { CategoryRepository } from './category-repository';
+import { CsvImportRepository } from './csv-import-repository';
 import { GuestIdentityRepository } from './guest-identity-repository';
 import type { RepositoryDependencies } from './repository-dependencies';
 import { ReviewRepository } from './review-repository';
@@ -32,6 +33,7 @@ export function createRepositories(database: SQLiteDatabase, identity: GuestIden
 
   return {
     categories: new CategoryRepository(database, identity, dependencies),
+    csvImports: new CsvImportRepository(database, identity, dependencies),
     reviews: new ReviewRepository(database, identity, dependencies),
     settings: new SettingsRepository(database, dependencies),
     sync: new VaultSyncRepository(database, identity),

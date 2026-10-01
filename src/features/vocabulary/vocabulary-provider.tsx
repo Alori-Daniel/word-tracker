@@ -21,6 +21,7 @@ import type {
   VocabularyWord,
   WordListOptions,
 } from '@/domain/vocabulary';
+import type { CsvWordImportRecord } from '@/domain/csv-import';
 import { useAccount } from '@/features/auth';
 
 type CreateCategoryInput = {
@@ -36,6 +37,8 @@ type VocabularyContextValue = {
   deleteWord: (id: string) => Promise<boolean>;
   error: Error | null;
   getWord: (id: string) => Promise<VocabularyWord | null>;
+  getCsvImportCount: () => Promise<number>;
+  importCsvWords: (records: readonly CsvWordImportRecord[], isPremium: boolean) => Promise<number>;
   isLoading: boolean;
   listWords: (options?: WordListOptions) => Promise<VocabularyWord[]>;
   recentWords: VocabularyWord[];
@@ -102,6 +105,21 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
     [queueSync, refresh, repositories],
   );
 
+  const getCsvImportCount = useCallback(
+    () => repositories.csvImports.countCompleted(),
+    [repositories],
+  );
+
+  const importCsvWords = useCallback(
+    async (records: readonly CsvWordImportRecord[], isPremium: boolean) => {
+      const imported = await repositories.csvImports.import(records, isPremium);
+      await refresh();
+      queueSync();
+      return imported;
+    },
+    [queueSync, refresh, repositories],
+  );
+
   const updateWord = useCallback(
     async (id: string, input: UpdateWordInput) => {
       const word = await repositories.words.update(id, input);
@@ -157,6 +175,8 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
       deleteWord,
       error,
       getWord,
+      getCsvImportCount,
+      importCsvWords,
       isLoading,
       listWords,
       recentWords,
@@ -174,6 +194,8 @@ export function VocabularyProvider({ children }: PropsWithChildren) {
       deleteWord,
       error,
       getWord,
+      getCsvImportCount,
+      importCsvWords,
       isLoading,
       listWords,
       recentWords,
