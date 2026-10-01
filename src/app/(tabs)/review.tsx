@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 
 import { AppButton, AppText, EmptyState, Screen } from '@/components/ui';
+import { appendUniqueById, shuffleItems } from '@/domain/practice-session';
 import type { ReviewResponse, VocabularyReviewHistoryItem } from '@/domain/vocabulary';
 import { useReview } from '@/features/review';
 import { useVocabulary } from '@/features/vocabulary';
@@ -12,7 +13,7 @@ import { createThemedStyles, useAppTheme } from '@/theme';
 export default function ReviewScreen() {
   const styles = useStyles();
   const { theme } = useAppTheme();
-  const { categories, wordCount } = useVocabulary();
+  const { categories, listWords, wordCount } = useVocabulary();
   const {
     dueCount,
     dueWords,
@@ -27,11 +28,18 @@ export default function ReviewScreen() {
     reviewedToday,
     submitReview,
   } = useReview();
-  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [sessionMode, setSessionMode] = useState<'practice' | 'scheduled' | null>(null);
   const [isRevealed, setIsRevealed] = useState(false);
   const [sessionTarget, setSessionTarget] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
-  const currentWord = dueWords[0];
+  const [practiceQueue, setPracticeQueue] = useState<typeof dueWords>([]);
+  const [practiceSource, setPracticeSource] = useState<typeof dueWords>([]);
+  const [missedPracticeWords, setMissedPracticeWords] = useState<typeof dueWords>([]);
+  const [practicedThisSession, setPracticedThisSession] = useState(0);
+  const [isPracticeLoading, setIsPracticeLoading] = useState(false);
+  const currentWord = sessionMode === 'practice' ? practiceQueue[0] : dueWords[0];
+  const completedThisSession =
+    sessionMode === 'practice' ? practicedThisSession : reviewedThisSession;
   const currentCategory = useMemo(
     () => categories.find((category) => category.id === currentWord?.categoryId),
     [categories, currentWord?.categoryId],
@@ -47,12 +55,61 @@ export default function ReviewScreen() {
     }, [refresh]),
   );
 
-  function startSession() {
+  function startScheduledSession() {
     resetSession();
     setSessionTarget(dueCount);
     setIsRevealed(false);
     setActionError(null);
-    setIsSessionActive(true);
+    setSessionMode('scheduled');
+  }
+
+  async function loadAllWords() {
+    const pageSize = 200;
+    const words: typeof dueWords = [];
+
+    for (let offset = 0; ; offset += pageSize) {
+      const page = await listWords({ limit: pageSize, offset });
+      words.push(...page);
+      if (page.length < pageSize) break;
+    }
+
+    return words;
+  }
+
+  function beginPractice(words: typeof dueWords) {
+    const shuffledWords = shuffleItems(words);
+    setPracticeSource(words);
+    setPracticeQueue(shuffledWords);
+    setMissedPracticeWords([]);
+    setPracticedThisSession(0);
+    setSessionTarget(shuffledWords.length);
+    setIsRevealed(false);
+    setActionError(null);
+    setSessionMode('practice');
+  }
+
+  async function startPracticeSession() {
+    setIsPracticeLoading(true);
+    setActionError(null);
+
+    try {
+      const words = await loadAllWords();
+      beginPractice(words);
+    } catch {
+      setActionError('Your words could not be loaded for practice. Please try again.');
+    } finally {
+      setIsPracticeLoading(false);
+    }
+  }
+
+  function startMissedWordsRound() {
+    const shuffledWords = shuffleItems(missedPracticeWords);
+    setPracticeQueue(shuffledWords);
+    setMissedPracticeWords([]);
+    setPracticedThisSession(0);
+    setSessionTarget(shuffledWords.length);
+    setIsRevealed(false);
+    setActionError(null);
   }
 
   async function respond(response: ReviewResponse) {
@@ -61,6 +118,16 @@ export default function ReviewScreen() {
     }
 
     setActionError(null);
+
+    if (sessionMode === 'practice') {
+      if (response === 'forgot') {
+        setMissedPracticeWords((current) => appendUniqueById(current, currentWord));
+      }
+      setPracticeQueue((current) => current.slice(1));
+      setPracticedThisSession((current) => current + 1);
+      setIsRevealed(false);
+      return;
+    }
 
     try {
       await submitReview(currentWord, response);
@@ -86,7 +153,7 @@ export default function ReviewScreen() {
     );
   }
 
-  if (isSessionActive) {
+  if (sessionMode) {
     return (
       <Screen edges={['top', 'right', 'left']}>
         <ScrollView
@@ -97,16 +164,16 @@ export default function ReviewScreen() {
           <View style={styles.sessionHeader}>
             <View style={styles.sessionHeadingCopy}>
               <AppText tone="tertiary" variant="caption">
-                REVIEW SESSION
+                {sessionMode === 'practice' ? 'FREE PRACTICE' : 'SCHEDULED REVIEW'}
               </AppText>
               <AppText variant="subtitle">
-                {Math.min(reviewedThisSession + (currentWord ? 1 : 0), sessionTarget)} of{' '}
+                {Math.min(completedThisSession + (currentWord ? 1 : 0), sessionTarget)} of{' '}
                 {sessionTarget}
               </AppText>
             </View>
             <Pressable
               accessibilityRole="button"
-              onPress={() => setIsSessionActive(false)}
+              onPress={() => setSessionMode(null)}
               style={({ pressed }) => pressed && styles.pressed}
             >
               <AppText style={styles.endSessionText} variant="label">
@@ -115,7 +182,7 @@ export default function ReviewScreen() {
             </Pressable>
           </View>
           <ProgressBar
-            progress={sessionTarget === 0 ? 1 : reviewedThisSession / sessionTarget}
+            progress={sessionTarget === 0 ? 1 : completedThisSession / sessionTarget}
           />
 
           {currentWord ? (
@@ -179,7 +246,7 @@ export default function ReviewScreen() {
                 </View>
               )}
             </View>
-          ) : dueCount > 0 || isLoading ? (
+          ) : sessionMode === 'scheduled' && (dueCount > 0 || isLoading) ? (
             <View style={styles.loadingNext}>
               <ActivityIndicator color={theme.colors.brand.primary} />
               <AppText tone="secondary">Loading the next words…</AppText>
@@ -195,15 +262,43 @@ export default function ReviewScreen() {
               </View>
               <AppText variant="title">Session complete</AppText>
               <AppText style={styles.centeredText} tone="secondary">
-                You reviewed {reviewedThisSession}{' '}
-                {reviewedThisSession === 1 ? 'word' : 'words'}. Your next reviews will appear when
-                they are due.
+                You {sessionMode === 'practice' ? 'practised' : 'reviewed'}{' '}
+                {completedThisSession}{' '}
+                {completedThisSession === 1 ? 'word' : 'words'}.
+                {sessionMode === 'scheduled'
+                  ? ' Your next reviews will appear when they are due.'
+                  : ' Your scheduled review dates were not changed.'}
               </AppText>
+              {sessionMode === 'practice' && missedPracticeWords.length > 0 ? (
+                <AppButton
+                  label={`Retry missed (${missedPracticeWords.length})`}
+                  onPress={startMissedWordsRound}
+                />
+              ) : null}
+              {sessionMode === 'practice' && practiceSource.length > 0 ? (
+                <AppButton
+                  label="Practice again"
+                  onPress={() => beginPractice(practiceSource)}
+                  variant="secondary"
+                />
+              ) : null}
+              {sessionMode === 'scheduled' && wordCount > 0 ? (
+                <AppButton
+                  label="Practice all words"
+                  loading={isPracticeLoading}
+                  onPress={() => void startPracticeSession()}
+                />
+              ) : null}
               <AppButton
                 label="Finish"
-                onPress={() => setIsSessionActive(false)}
-                variant="secondary"
+                onPress={() => setSessionMode(null)}
+                variant="ghost"
               />
+              {actionError ? (
+                <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
+                  {actionError}
+                </AppText>
+              ) : null}
             </View>
           )}
 
@@ -294,7 +389,7 @@ export default function ReviewScreen() {
                 Work through {dueCount} {dueCount === 1 ? 'word' : 'words'} at your own pace.
               </AppText>
             </View>
-            <AppButton label="Start review" onPress={startSession} />
+            <AppButton label="Start review" onPress={startScheduledSession} />
           </View>
         ) : (
           <EmptyState
@@ -309,6 +404,38 @@ export default function ReviewScreen() {
             title={wordCount === 0 ? 'Nothing to review yet' : 'You are caught up'}
           />
         )}
+
+        {wordCount > 0 ? (
+          <View style={styles.practiceSection}>
+            <View style={styles.practiceHeading}>
+              <View style={styles.startIcon}>
+                <MaterialIcons
+                  color={theme.colors.brand.primary}
+                  name="all-inclusive"
+                  size={30}
+                />
+              </View>
+              <View style={styles.startCopy}>
+                <AppText variant="subtitle">Practice all words</AppText>
+                <AppText tone="secondary">
+                  Shuffle through your entire library anytime. Practice does not change your review
+                  schedule.
+                </AppText>
+              </View>
+            </View>
+            <AppButton
+              label="Start free practice"
+              loading={isPracticeLoading}
+              onPress={() => void startPracticeSession()}
+              variant="secondary"
+            />
+            {actionError && !sessionMode ? (
+              <AppText accessibilityRole="alert" style={styles.errorText} variant="caption">
+                {actionError}
+              </AppText>
+            ) : null}
+          </View>
+        ) : null}
 
         {recentReviews.length > 0 ? <RecentActivity reviews={recentReviews} /> : null}
       </ScrollView>
@@ -475,6 +602,17 @@ const useStyles = createThemedStyles((theme) => ({
   },
   startCopy: {
     gap: theme.spacing.xs,
+  },
+  practiceSection: {
+    borderBottomColor: theme.colors.border.subtle,
+    borderBottomWidth: 1,
+    borderTopColor: theme.colors.border.subtle,
+    borderTopWidth: 1,
+    gap: theme.spacing.md,
+    paddingVertical: theme.spacing.xl,
+  },
+  practiceHeading: {
+    gap: theme.spacing.md,
   },
   sessionHeader: {
     alignItems: 'center',
