@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import {
   DEFAULT_LOCAL_SETTINGS,
+  isReviewReminderTime,
   isThemeMode,
   type LocalSettings,
   type ThemeMode,
@@ -15,6 +16,7 @@ const SETTING_KEYS = {
   themeMode: 'theme_mode',
   onboardingCompleted: 'onboarding_completed',
   reviewRemindersEnabled: 'review_reminders_enabled',
+  reviewReminderTime: 'review_reminder_time',
   widgetPreferences: 'widget_preferences',
 } as const;
 
@@ -40,6 +42,7 @@ export class SettingsRepository {
     const themeMode = values.get(SETTING_KEYS.themeMode);
     const onboardingCompleted = values.get(SETTING_KEYS.onboardingCompleted);
     const reviewRemindersEnabled = values.get(SETTING_KEYS.reviewRemindersEnabled);
+    const reviewReminderTime = values.get(SETTING_KEYS.reviewReminderTime);
     const widgetPreferences = values.get(SETTING_KEYS.widgetPreferences);
 
     return {
@@ -52,6 +55,9 @@ export class SettingsRepository {
         typeof reviewRemindersEnabled === 'boolean'
           ? reviewRemindersEnabled
           : DEFAULT_LOCAL_SETTINGS.reviewRemindersEnabled,
+      reviewReminderTime: isReviewReminderTime(reviewReminderTime)
+        ? reviewReminderTime
+        : DEFAULT_LOCAL_SETTINGS.reviewReminderTime,
       widgetPreferences: parseWidgetPreferences(widgetPreferences),
     };
   }
@@ -66,6 +72,14 @@ export class SettingsRepository {
 
   setReviewRemindersEnabled(enabled: boolean): Promise<void> {
     return this.setValue(SETTING_KEYS.reviewRemindersEnabled, enabled);
+  }
+
+  setReviewReminderTime(time: string): Promise<void> {
+    if (!isReviewReminderTime(time)) {
+      return Promise.reject(new Error('A valid reminder time is required.'));
+    }
+
+    return this.setValue(SETTING_KEYS.reviewReminderTime, time);
   }
 
   setWidgetPreferences(preferences: WidgetPreferences): Promise<void> {

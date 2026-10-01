@@ -1,5 +1,7 @@
-import { Stack } from 'expo-router';
+import * as Notifications from 'expo-notifications';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { LocalDataProvider, useLocalData } from '@/data';
@@ -9,10 +11,28 @@ import { ReviewProvider } from '@/features/review';
 import { SubscriptionProvider } from '@/features/subscriptions';
 import { VocabularyProvider } from '@/features/vocabulary';
 import { WidgetSyncProvider } from '@/features/widgets';
+import {
+  configureReviewReminderPresentation,
+  isReviewReminderResponse,
+} from '@/services/reminders';
 import { AppThemeProvider, useAppTheme } from '@/theme';
+
+configureReviewReminderPresentation();
 
 function RootNavigator() {
   const { theme } = useAppTheme();
+
+  useEffect(() => {
+    function openReview(response: Notifications.NotificationResponse | null) {
+      if (!isReviewReminderResponse(response)) return;
+      router.push('/(tabs)/review');
+      Notifications.clearLastNotificationResponse();
+    }
+
+    openReview(Notifications.getLastNotificationResponse());
+    const subscription = Notifications.addNotificationResponseReceivedListener(openReview);
+    return () => subscription.remove();
+  }, []);
 
   return (
     <>

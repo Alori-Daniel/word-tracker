@@ -86,7 +86,16 @@
           ]
         }
       ],
-      "./plugins/with-work-manager-compatibility"
+      "./plugins/with-work-manager-compatibility",
+      [
+        "expo-notifications",
+        {
+          "color": "#0878B8",
+          "defaultChannel": "review-reminders"
+        }
+      ],
+      "expo-sharing",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

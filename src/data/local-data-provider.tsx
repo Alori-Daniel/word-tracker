@@ -36,6 +36,8 @@ type LocalDataContextValue = {
   notifyCloudDataChanged: () => void;
   wordCount: number;
   setOnboardingCompleted: (completed: boolean) => Promise<void>;
+  setReviewRemindersEnabled: (enabled: boolean) => Promise<void>;
+  setReviewReminderTime: (time: string) => Promise<void>;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   setWidgetPreferences: (preferences: WidgetPreferences) => Promise<void>;
 };
@@ -45,6 +47,8 @@ type LocalDataSnapshot = Omit<
   | 'linkAccount'
   | 'notifyCloudDataChanged'
   | 'setOnboardingCompleted'
+  | 'setReviewRemindersEnabled'
+  | 'setReviewReminderTime'
   | 'setThemeMode'
   | 'setWidgetPreferences'
 >;
@@ -183,6 +187,50 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
     [state],
   );
 
+  const setReviewRemindersEnabled = useCallback(
+    async (enabled: boolean) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      await state.value.repositories.settings.setReviewRemindersEnabled(enabled);
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                settings: { ...current.value.settings, reviewRemindersEnabled: enabled },
+              },
+            }
+          : current,
+      );
+    },
+    [state],
+  );
+
+  const setReviewReminderTime = useCallback(
+    async (time: string) => {
+      if (state.status !== 'ready') {
+        throw new Error('Local data is not ready.');
+      }
+
+      await state.value.repositories.settings.setReviewReminderTime(time);
+      setState((current) =>
+        current.status === 'ready'
+          ? {
+              ...current,
+              value: {
+                ...current.value,
+                settings: { ...current.value.settings, reviewReminderTime: time },
+              },
+            }
+          : current,
+      );
+    },
+    [state],
+  );
+
   const setWidgetPreferences = useCallback(
     async (preferences: WidgetPreferences) => {
       if (state.status !== 'ready') {
@@ -254,6 +302,8 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
             linkAccount,
             notifyCloudDataChanged,
             setOnboardingCompleted,
+            setReviewRemindersEnabled,
+            setReviewReminderTime,
             setThemeMode,
             setWidgetPreferences,
           }
@@ -262,6 +312,8 @@ function LocalDataBootstrap({ children }: PropsWithChildren) {
       linkAccount,
       notifyCloudDataChanged,
       setOnboardingCompleted,
+      setReviewRemindersEnabled,
+      setReviewReminderTime,
       setThemeMode,
       setWidgetPreferences,
       state,
