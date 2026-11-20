@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <title>WordEcho Android adaptive icon foreground</title>
+  <defs>
+    <linearGradient id="wordecho-ribbon" x1="174" y1="326" x2="812" y2="705" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#159BFF"/>
+      <stop offset="0.52" stop-color="#0878E8"/>
+      <stop offset="1" stop-color="#064FD4"/>
+    </linearGradient>
+    <linearGradient id="wordecho-echo" x1="782" y1="272" x2="928" y2="650" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#39B5FF"/>
+      <stop offset="1" stop-color="#0878E8"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(112 112) scale(.78)">
+    <path
+      d="M174 354L310 690L505 354L687 690L792 468"
+      stroke="url(#wordecho-ribbon)"
+      stroke-width="112"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M794 372C852 413 860 500 812 550"
+      stroke="url(#wordecho-echo)"
+      stroke-width="64"
+      stroke-linecap="round"
+    />
+    <path
+      d="M829 278C951 367 964 548 866 650"
+      stroke="url(#wordecho-echo)"
+      stroke-width="64"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>

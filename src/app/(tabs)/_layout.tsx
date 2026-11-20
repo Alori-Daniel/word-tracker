@@ -1,6 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Redirect, Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { DynamicColorIOS, Platform, View } from 'react-native';
 
 import { useLocalData } from '@/data';
 import { useReview } from '@/features/review';
@@ -14,6 +15,10 @@ export default function TabLayout() {
 
   if (!settings.onboardingCompleted) {
     return <Redirect href="/(onboarding)/welcome" />;
+  }
+
+  if (Platform.OS === 'ios') {
+    return <IosNativeTabs dueCount={dueCount} />;
   }
 
   return (
@@ -106,6 +111,58 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+  );
+}
+
+function IosNativeTabs({ dueCount }: { dueCount: number }) {
+  const { theme } = useAppTheme();
+  const selectedColor = DynamicColorIOS({
+    dark: theme.colors.brand.primary,
+    light: theme.colors.brand.primary,
+  });
+  const defaultColor = DynamicColorIOS({
+    dark: theme.colors.content.secondary,
+    light: theme.colors.content.secondary,
+  });
+
+  return (
+    <NativeTabs
+      blurEffect="systemDefault"
+      iconColor={{ default: defaultColor, selected: selectedColor }}
+      labelStyle={{
+        default: { color: defaultColor, fontSize: 10, fontWeight: '500' },
+        selected: { color: selectedColor, fontSize: 10, fontWeight: '600' },
+      }}
+      tintColor={selectedColor}
+    >
+      <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} />
+        <NativeTabs.Trigger.Label>Today</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="library">
+        <NativeTabs.Trigger.Icon sf={{ default: 'book.closed', selected: 'book.closed.fill' }} />
+        <NativeTabs.Trigger.Label>Words</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="add">
+        <NativeTabs.Trigger.Icon sf={{ default: 'plus.circle', selected: 'plus.circle.fill' }} />
+        <NativeTabs.Trigger.Label>Add</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="review">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'graduationcap', selected: 'graduationcap.fill' }}
+        />
+        <NativeTabs.Trigger.Label>Review</NativeTabs.Trigger.Label>
+        {dueCount > 0 ? (
+          <NativeTabs.Trigger.Badge>
+            {dueCount > 99 ? '99+' : String(dueCount)}
+          </NativeTabs.Trigger.Badge>
+        ) : null}
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Icon sf={{ default: 'gearshape', selected: 'gearshape.fill' }} />
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
 

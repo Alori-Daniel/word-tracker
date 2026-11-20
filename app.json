@@ -5,7 +5,7 @@
     "scheme": "wordecho",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/branding/wordecho-app-icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.danori.wordecho",
@@ -14,10 +14,9 @@
     "android": {
       "package": "com.danori.wordecho",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#F7F6F1",
+        "foregroundImage": "./assets/branding/wordecho-android-foreground.png",
+        "monochromeImage": "./assets/branding/wordecho-android-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -96,6 +95,34 @@
       ],
       "expo-sharing",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "headers": {
+          "Cross-Origin-Embedder-Policy": "credentialless",
+          "Cross-Origin-Opener-Policy": "same-origin"
+        }
+      },
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.danori.wordecho.widgets",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.danori.wordecho"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "789055c1-7960-4bae-b91d-a52a9577ba9e"
+      }
+    }
   }
 }

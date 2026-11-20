@@ -1,20 +1,17 @@
-import { View } from 'react-native';
+import { ActivityIndicator, Image, Pressable } from 'react-native';
 
-import { AppButton, AppText } from '@/components/ui';
-import { createThemedStyles } from '@/theme';
+import { AppText } from '@/components/ui';
+import { createThemedStyles, useAppTheme } from '@/theme';
 
 import { useAccount } from './account-provider';
 
 type GoogleSignInButtonProps = {
   onSignedIn?: () => void | Promise<void>;
-  variant?: 'primary' | 'secondary';
 };
 
-export function GoogleSignInButton({
-  onSignedIn,
-  variant = 'secondary',
-}: GoogleSignInButtonProps) {
+export function GoogleSignInButton({ onSignedIn }: GoogleSignInButtonProps) {
   const styles = useStyles();
+  const { theme } = useAppTheme();
   const { isConfigured, isSigningIn, signInWithGoogle } = useAccount();
 
   async function signIn() {
@@ -23,36 +20,61 @@ export function GoogleSignInButton({
   }
 
   return (
-    <AppButton
+    <Pressable
       accessibilityLabel="Sign in with Google"
-      disabled={!isConfigured}
-      label="Sign in with Google"
-      leftAccessory={
-        <View style={styles.googleMark}>
-          <AppText style={styles.googleMarkText} variant="label">
-            G
-          </AppText>
-        </View>
-      }
-      loading={isSigningIn}
+      accessibilityRole="button"
+      accessibilityState={{ busy: isSigningIn, disabled: !isConfigured || isSigningIn }}
+      disabled={!isConfigured || isSigningIn}
       onPress={() => void signIn()}
-      variant={variant}
-    />
+      style={({ pressed }) => [
+        styles.button,
+        pressed && styles.pressed,
+        (!isConfigured || isSigningIn) && styles.disabled,
+      ]}
+    >
+      {isSigningIn ? (
+        <ActivityIndicator color={theme.isDark ? '#E3E3E3' : '#1F1F1F'} />
+      ) : (
+        <>
+          <Image
+            accessibilityIgnoresInvertColors
+            resizeMode="contain"
+            source={require('../../../assets/google-g-logo.png')}
+            style={styles.googleLogo}
+          />
+          <AppText style={styles.label} variant="label">
+            Sign in with Google
+          </AppText>
+        </>
+      )}
+    </Pressable>
   );
 }
 
 const useStyles = createThemedStyles((theme) => ({
-  googleMark: {
+  button: {
     alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    borderColor: theme.colors.border.subtle,
+    backgroundColor: theme.isDark ? '#131314' : '#FFFFFF',
+    borderColor: theme.isDark ? '#8E918F' : '#747775',
     borderRadius: theme.radius.pill,
     borderWidth: 1,
-    height: 24,
+    flexDirection: 'row',
+    gap: 12,
+    minHeight: 54,
     justifyContent: 'center',
-    width: 24,
+    paddingHorizontal: 16,
   },
-  googleMarkText: {
-    color: theme.colors.brand.primary,
+  googleLogo: {
+    height: 20,
+    width: 20,
+  },
+  label: {
+    color: theme.isDark ? '#E3E3E3' : '#1F1F1F',
+  },
+  pressed: {
+    opacity: 0.82,
+  },
+  disabled: {
+    opacity: 0.45,
   },
 }));

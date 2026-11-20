@@ -310,7 +310,7 @@ export default function SettingsScreen() {
                     </View>
                   ))}
                 </View>
-                <GoogleSignInButton variant="primary" />
+                <GoogleSignInButton />
                 {!isAccountConfigured ? (
                   <AppText tone="tertiary" variant="caption">
                     Google sign-in needs Supabase configuration for this build.
